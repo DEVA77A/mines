@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 
-const ExportModal = ({ isOpen, onClose, data, mineData }) => {
+const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
   const { isDarkMode } = useTheme();
   const [exportType, setExportType] = useState('pdf');
   const [exportOptions, setExportOptions] = useState({
@@ -23,11 +23,18 @@ const ExportModal = ({ isOpen, onClose, data, mineData }) => {
 
   const handleExport = async () => {
     setIsExporting(true);
-    
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // If parent provided an onExport handler, call it (this will use the real API export)
+      if (typeof onExport === 'function') {
+        await onExport(exportType, exportOptions);
+        setIsExporting(false);
+        onClose();
+        return;
+      }
+
+      // Fallback: simulate export (keeps existing behavior for contexts that don't pass onExport)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       const exportData = {
         timestamp: new Date().toISOString(),
         type: exportType,
@@ -36,11 +43,9 @@ const ExportModal = ({ isOpen, onClose, data, mineData }) => {
         data: exportType === 'json' ? data : 'Binary data...'
       };
 
-      // Create and download file
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: exportType === 'json' ? 'application/json' : 'text/plain'
       });
-      
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -49,13 +54,9 @@ const ExportModal = ({ isOpen, onClose, data, mineData }) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
-      // Show success message
-      setTimeout(() => {
-        setIsExporting(false);
-        onClose();
-      }, 1000);
-      
+
+      setIsExporting(false);
+      onClose();
     } catch (error) {
       console.error('Export failed:', error);
       setIsExporting(false);

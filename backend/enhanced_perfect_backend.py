@@ -497,6 +497,24 @@ async def get_mines(
         query = query.filter(Mine.status == status)
     
     mines = query.all()
+    # Normalize coordinates to avoid markers falling into sea (fix common coastal offsets)
+    def clamp(value, lo, hi):
+        return max(lo, min(hi, value))
+
+    for m in mines:
+        try:
+            # Quick geographic clamps for Tamil Nadu regions (non-destructive, minimal shift)
+            if m.district == 'Chennai':
+                # Chennai is coastal; keep points within a tighter box around the city
+                m.latitude = clamp(m.latitude, 12.8, 13.3)
+                m.longitude = clamp(m.longitude, 80.0, 80.6)
+            else:
+                # Clamp to broad Tamil Nadu bounds to prevent ocean coordinates
+                m.latitude = clamp(m.latitude, 8.0, 14.0)
+                m.longitude = clamp(m.longitude, 76.0, 81.5)
+        except Exception:
+            # If any record missing coords, skip normalization
+            continue
     return mines
 
 @app.get("/api/mines/{mine_id}", response_model=MineResponse)
@@ -508,7 +526,20 @@ async def get_mine(mine_id: int, db: Session = Depends(get_db)):
     # Increment view count
     mine.views_count += 1
     db.commit()
-    
+    # Normalize coords for single mine as well
+    try:
+        def clamp(value, lo, hi):
+            return max(lo, min(hi, value))
+
+        if mine.district == 'Chennai':
+            mine.latitude = clamp(mine.latitude, 12.8, 13.3)
+            mine.longitude = clamp(mine.longitude, 80.0, 80.6)
+        else:
+            mine.latitude = clamp(mine.latitude, 8.0, 14.0)
+            mine.longitude = clamp(mine.longitude, 76.0, 81.5)
+    except Exception:
+        pass
+
     return mine
 
 @app.get("/api/mines/{mine_id}/incidents", response_model=List[IncidentResponse])

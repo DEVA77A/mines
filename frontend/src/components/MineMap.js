@@ -63,17 +63,39 @@ const MapUpdater = ({ center, zoom }) => {
 const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = "" }) => {
   const [mapCenter, setMapCenter] = useState([11.1271, 78.6569]); // Tamil Nadu center
   const [mapZoom, setMapZoom] = useState(7);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // Normalizes mine objects coming from different API shapes so the map
+  // component works with both old and new backends without breaking clicks.
+  const normalize = (mine) => {
+    if (!mine) return null;
+    return {
+      id: mine.id ?? mine.mine_id ?? null,
+      name: mine.name ?? mine.mine_name ?? mine.mine_title ?? 'Unknown',
+      latitude: mine.latitude ?? mine.lat ?? mine.location?.lat ?? null,
+      longitude: mine.longitude ?? mine.lon ?? mine.lng ?? mine.location?.lng ?? null,
+      district: mine.district ?? mine.district_name ?? '',
+      type: mine.type ?? mine.mine_type ?? mine.mineral ?? '',
+      status: mine.status ?? 'Unknown',
+      risk_level: mine.risk_level ?? mine.risk_assessment?.risk_level ?? mine.risk?.level ?? 'Unknown',
+      risk_score: mine.risk_score ?? mine.risk_assessment?.risk_score ?? mine.risk?.score ?? null,
+      operational_data: mine.operational_data ?? mine.ops ?? {},
+      description: mine.description ?? mine.summary ?? ''
+    };
+  };
 
   useEffect(() => {
-    if (selectedMine) {
-      setMapCenter([selectedMine.latitude, selectedMine.longitude]);
+    const s = normalize(selectedMine);
+    if (s && s.latitude && s.longitude) {
+      setMapCenter([s.latitude, s.longitude]);
       setMapZoom(12);
     }
   }, [selectedMine]);
 
   const handleMarkerClick = (mine) => {
+    const n = normalize(mine);
     if (onMineSelect) {
-      onMineSelect(mine);
+      onMineSelect(n);
     }
   };
 
@@ -99,44 +121,47 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
           opacity={0.6}
         />
 
-        {mines.map((mine) => (
-          <Marker
-            key={mine.mine_id}
-            position={[mine.latitude, mine.longitude]}
-            icon={createRiskIcon(mine.risk_assessment?.risk_level || 'Unknown')}
-            eventHandlers={{
-              click: () => handleMarkerClick(mine)
-            }}
-          >
+        {mines.map((mine) => {
+          const m = normalize(mine);
+          if (!m || m.latitude == null || m.longitude == null) return null;
+          return (
+            <Marker
+              key={m.id ?? `${m.latitude}-${m.longitude}`}
+              position={[m.latitude, m.longitude]}
+              icon={createRiskIcon(m.risk_level || 'Unknown')}
+              eventHandlers={{
+                click: () => handleMarkerClick(mine)
+              }}
+            >
             <Popup className="custom-popup">
               <div className="p-2 min-w-[200px]">
-                <h3 className="font-semibold text-gray-900 mb-2">{mine.mine_name}</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{m.name}</h3>
                 <div className="space-y-1 text-sm text-gray-600">
-                  <p><span className="font-medium">District:</span> {mine.district}</p>
-                  <p><span className="font-medium">Mineral:</span> {mine.mine_type}</p>
-                  <p><span className="font-medium">Area:</span> {mine.operational_data?.area_hectares} ha</p>
+                  <p><span className="font-medium">District:</span> {m.district}</p>
+                  <p><span className="font-medium">Mineral:</span> {m.type}</p>
+                  <p><span className="font-medium">Area:</span> {m.operational_data?.area_hectares ?? m.operational_data?.area} ha</p>
                   <p><span className="font-medium">Status:</span> 
                     <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                      mine.status === 'Active' 
+                      m.status === 'Active' 
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-gray-100 text-gray-700'
                     }`}>
-                      {mine.status}
+                      {m.status}
                     </span>
                   </p>
-                  {mine.risk_assessment?.risk_level && (
+                  {m.risk_level && (
                     <p><span className="font-medium">Risk:</span>
                       <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                        mine.risk_assessment.risk_level === 'High' ? 'bg-red-100 text-red-700' :
-                        mine.risk_assessment.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                        m.risk_level === 'High' ? 'bg-red-100 text-red-700' :
+                        m.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-green-100 text-green-700'
                       }`}>
-                        {mine.risk_assessment.risk_level}
+                        {m.risk_level}
                       </span>
                     </p>
                   )}
-                  {mine.risk_assessment?.risk_score && (
-                    <p><span className="font-medium">Score:</span> {mine.risk_assessment.risk_score.toFixed(1)}%</p>
+                  {typeof m.risk_score === 'number' && (
+                    <p><span className="font-medium">Score:</span> {Number(m.risk_score).toFixed(1)}%</p>
                   )}
                 </div>
                 <button 
@@ -147,8 +172,9 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
                 </button>
               </div>
             </Popup>
-          </Marker>
-        ))}
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       {/* Map Legend */}
@@ -185,7 +211,55 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
         </button>
+
+        {/* Fullscreen toggle */}
+        <button
+          onClick={() => setFullscreen(true)}
+          className="mt-2 bg-white text-gray-700 p-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors duration-200"
+          title="Fullscreen"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 3H5a2 2 0 00-2 2v3m0 8v3a2 2 0 002 2h3m8-16h3a2 2 0 012 2v3M16 21h3a2 2 0 002-2v-3" />
+          </svg>
+        </button>
       </div>
+
+      {/* Fullscreen overlay */}
+      {fullscreen && (
+        <div className="fixed inset-0 z-[2000] bg-white">
+          <div className="absolute top-4 right-4 z-[2100]">
+            <button
+              onClick={() => setFullscreen(false)}
+              className="bg-white text-gray-700 p-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors duration-200"
+              title="Close fullscreen"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="w-full h-full">
+            <MapContainer
+              center={mapCenter}
+              zoom={mapZoom}
+              style={{ height: '100vh', width: '100%' }}
+            >
+              <MapUpdater center={mapCenter} zoom={mapZoom} />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {mines.map((mine) => {
+                const m = normalize(mine);
+                if (!m || m.latitude == null || m.longitude == null) return null;
+                return (
+                  <Marker
+                    key={`fs-${m.id ?? (m.latitude + '-' + m.longitude)}`}
+                    position={[m.latitude, m.longitude]}
+                    icon={createRiskIcon(m.risk_level || 'Unknown')}
+                    eventHandlers={{ click: () => handleMarkerClick(mine) }}
+                  />
+                );
+              })}
+            </MapContainer>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -80,9 +80,10 @@ const Dashboard = () => {
     toast.success(`Selected ${mine.mine_name}`);
   };
 
-  const handleExport = (format) => {
-    toast.success(`Exporting ${filteredMines.length} mines as ${format.toUpperCase()}`);
-    // Export logic would go here
+  const handleExport = (format, exportOptions) => {
+    toast.success(`Exporting ${filteredMines.length} mines as ${format?.toUpperCase()}`);
+    // If a backend export API is added, call it here. For now we just close the modal.
+    console.log('Export requested:', { format, exportOptions, count: filteredMines.length });
     setShowExport(false);
   };
 
@@ -277,7 +278,8 @@ const Dashboard = () => {
         )}
         {showExport && (
           <ExportModal
-            mines={filteredMines}
+            isOpen={showExport}
+            mineData={filteredMines}
             onExport={handleExport}
             onClose={() => setShowExport(false)}
           />

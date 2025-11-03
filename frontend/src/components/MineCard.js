@@ -12,6 +12,7 @@ import {
 const MineCard = ({ mine, onClick, className = "" }) => {
   const getRiskColor = (riskLevel) => {
     switch (riskLevel) {
+      case 'Critical': return 'text-white bg-red-700 border-red-700';
       case 'High': return 'text-red-600 bg-red-50 border-red-200';
       case 'Medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       case 'Low': return 'text-green-600 bg-green-50 border-green-200';
@@ -21,6 +22,7 @@ const MineCard = ({ mine, onClick, className = "" }) => {
 
   const getRiskIcon = (riskLevel) => {
     switch (riskLevel) {
+      case 'Critical': return <AlertTriangle className="w-4 h-4 text-white" />;
       case 'High': return <TrendingUp className="w-4 h-4" />;
       case 'Medium': return <AlertTriangle className="w-4 h-4" />;
       case 'Low': return <TrendingDown className="w-4 h-4" />;

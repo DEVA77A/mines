@@ -28,6 +28,14 @@ const PerfectMineCard = ({ mine, onClick, showDetails = false }) => {
   // Risk level styling
   const getRiskStyling = (riskLevel) => {
     switch (riskLevel) {
+      case 'Critical':
+        return {
+          bg: 'bg-red-800/10',
+          border: 'border-red-700/30',
+          text: 'text-red-900',
+          badge: 'bg-red-700',
+          icon: 'text-red-700'
+        };
       case 'High':
         return {
           bg: 'bg-red-50',
