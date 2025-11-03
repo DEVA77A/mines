@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Instagram-inspired styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  /* Instagram-style buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium py-2 px-6 rounded-full hover:shadow-lg transition-all duration-200 transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-300 font-medium py-2 px-6 rounded-full hover:bg-gray-50 transition-all duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 text-white font-medium py-2 px-6 rounded-full hover:bg-red-600 transition-all duration-200;
+  }
+  
+  /* Instagram-style cards */
+  .card-instagram {
+    @apply bg-white rounded-instagram shadow-instagram border border-gray-100 overflow-hidden transition-all duration-200 hover:shadow-card-hover;
+  }
+  
+  .card-gradient {
+    @apply bg-gradient-to-br from-white to-gray-50 rounded-instagram shadow-card border border-gray-100;
+  }
+  
+  /* Risk indicators */
+  .risk-low {
+    @apply bg-green-50 text-green-700 border-green-200;
+  }
+  
+  .risk-medium {
+    @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+  }
+  
+  .risk-high {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+  
+  /* Input styles */
+  .input-instagram {
+    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent;
+  }
+  
+  /* Loading states */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  /* Map styles */
+  .leaflet-container {
+    @apply rounded-instagram overflow-hidden;
+  }
+  
+  /* Custom scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Dashboard grid */
+  .dashboard-grid {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  /* Mobile responsive adjustments */
+  @screen sm {
+    .dashboard-grid {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+  }
+  
+  @screen lg {
+    .dashboard-grid {
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+  }
+}
+
+@layer utilities {
+  /* Custom utilities */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .backdrop-blur-instagram {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/80 border border-white/20;
+  }
+  
+  /* Dark mode support */
+  .dark .card-instagram {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .dark .glass-effect {
+    @apply bg-gray-800/80 border-gray-700/20;
+  }
+  
+  .dark .input-instagram {
+    @apply bg-gray-800 border-gray-600 text-white;
+  }
+}
+
+/* Leaflet marker customization */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.marker-risk-low {
+  color: #10b981;
+}
+
+.marker-risk-medium {
+  color: #f59e0b;
+}
+
+.marker-risk-high {
+  color: #ef4444;
+}
+
+/* Chart customizations */
+.recharts-cartesian-axis-tick-value {
+  font-size: 12px;
+  fill: #6b7280;
+}
+
+.recharts-legend-item-text {
+  color: #374151 !important;
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+  background-size: 800px 104px;
+}
+
+/* Responsive text */
+.responsive-text {
+  @apply text-sm sm:text-base lg:text-lg;
+}
+
+.responsive-heading {
+  @apply text-lg sm:text-xl lg:text-2xl;
+}

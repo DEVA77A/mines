@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+*.sqlite3
+*.db
+*.sqlite
+*.log
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build
+frontend/build/
+
+# IDE
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets
+*.pem
+*.key
+
+# Database files (do not commit)
+enhanced_rockfall_system.db
+perfect_rockfall_system.db
+rockfall_system.db

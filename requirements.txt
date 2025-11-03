@@ -1,0 +1,39 @@
+# Core dependencies with Python 3.13 compatibility
+setuptools>=65.0.0
+wheel>=0.38.0
+
+# Data Processing and Geospatial
+pandas>=2.1.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# Machine Learning (simplified for compatibility)
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Web Framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+python-multipart>=0.0.6
+starlette>=0.27.0
+
+# Image Processing (basic)
+Pillow>=10.0.0
+matplotlib>=3.7.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Report Generation
+openpyxl>=3.1.0
+jinja2>=3.1.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+schedule>=1.2.0
+
+# Development and Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
