@@ -6,8 +6,9 @@ import 'leaflet/dist/leaflet.css';
 // npm install react-leaflet-markercluster
 let MarkerClusterGroup;
 try {
-  // dynamically require so the app still runs if package not installed
-  MarkerClusterGroup = require('react-leaflet-markercluster');
+  // Use indirect require via eval to avoid bundlers statically resolving the import
+  const req = eval('require');
+  MarkerClusterGroup = req('react-leaflet-markercluster');
   MarkerClusterGroup = MarkerClusterGroup && MarkerClusterGroup.default ? MarkerClusterGroup.default : MarkerClusterGroup;
 } catch (e) {
   MarkerClusterGroup = null;
@@ -104,8 +105,20 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, onExportVisibl
     }
   }, [selectedMine]);
 
+  // Pre-normalize mines to simplify filtering and rendering. This ensures
+  // the same normalized shape is used everywhere (map, export, fullscreen).
+  const normalizedMines = React.useMemo(() => {
+    return (mines || []).map(normalize).filter(Boolean);
+  }, [mines]);
+
+  const filteredMines = React.useMemo(() => {
+    if (!districtFilter || districtFilter.trim() === '') return normalizedMines;
+    const q = districtFilter.trim().toLowerCase();
+    return normalizedMines.filter((m) => (String(m.district || '').toLowerCase().indexOf(q) > -1));
+  }, [normalizedMines, districtFilter]);
+
   const handleMarkerClick = (mine) => {
-    const n = normalize(mine);
+    const n = mine && mine.id ? mine : normalize(mine);
     if (onMineSelect) {
       onMineSelect(n);
     }
@@ -113,67 +126,16 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, onExportVisibl
 
   const exportVisibleAsCSV = () => {
     if (!mapInstance) return;
-    const bounds = mapInstance.getBounds();
-    const visible = mines.map(normalize).filter(m => m && m.latitude != null && m.longitude != null && bounds.contains([m.latitude, m.longitude]));
-    if (visible.length === 0) {
-      alert('No mines are visible in the current map view.');
-      return;
-    }
-    if (typeof window === 'undefined') return;
-    // If parent provided handler via prop, use it
-    if (typeof onExportVisible === 'function') {
-      onExportVisible(visible);
-      return;
-    }
-    // Fallback: build CSV and download
-    const headers = ['id','name','latitude','longitude','district','type','status','risk_level','risk_score'];
-    const rows = visible.map(m => headers.map(h => JSON.stringify(m[h] ?? '')).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `visible_mines_${Date.now()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <div className={`relative ${className}`}>
-      <MapContainer
-        center={mapCenter}
-        zoom={mapZoom}
-        style={{ height: '100%', width: '100%', minHeight: '400px' }}
-        className="rounded-instagram shadow-card"
-        whenCreated={setMapInstance}
-      >
-        <MapUpdater center={mapCenter} zoom={mapZoom} />
-        
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        
-        {/* Satellite layer option */}
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution='&copy; <a href="https://www.arcgis.com/">ArcGIS</a>'
-          opacity={0.6}
-        />
-
         {MarkerClusterGroup ? (
           <MarkerClusterGroup>
-            {mines.filter(m=> !(districtFilter && districtFilter.length>0) || (String(m.district || m.district_name || m.district_name)?.toLowerCase().indexOf(districtFilter.toLowerCase())>-1)).map((mine) => {
-              const m = normalize(mine);
+            {filteredMines.map((m) => {
               if (!m || m.latitude == null || m.longitude == null) return null;
-              return (
+    }
                 <Marker
                   key={m.id ?? `${m.latitude}-${m.longitude}`}
                   position={[m.latitude, m.longitude]}
                   icon={createRiskIcon(m.risk_level || 'Unknown')}
-                  eventHandlers={{ click: () => handleMarkerClick(mine) }}
+                  eventHandlers={{ click: () => handleMarkerClick(m) }}
                 >
                   <Popup className="custom-popup">
                     <div className="p-2 min-w-[200px]">
@@ -204,7 +166,7 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, onExportVisibl
                         )}
                       </div>
                       <button 
-                        onClick={() => handleMarkerClick(mine)}
+                        onClick={() => handleMarkerClick(m)}
                         className="mt-3 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
                       >
                         View Details
@@ -212,8 +174,58 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, onExportVisibl
                     </div>
                   </Popup>
                 </Marker>
-              );
-            })}
+
+        {MarkerClusterGroup ? (
+          <MarkerClusterGroup>
+            {mines.filter(m=> !(districtFilter && districtFilter.length>0) || (String(m.district || m.district_name || m.district_name)?.toLowerCase().indexOf(districtFilter.toLowerCase())>-1)).map((mine) => {
+          filteredMines.map((m) => {
+            if (!m || m.latitude == null || m.longitude == null) return null;
+            return (
+              <Marker
+                key={m.id ?? `${m.latitude}-${m.longitude}`}
+                position={[m.latitude, m.longitude]}
+                icon={createRiskIcon(m.risk_level || 'Unknown')}
+                eventHandlers={{ click: () => handleMarkerClick(m) }}
+              >
+              <Popup className="custom-popup">
+                <div className="p-2 min-w-[200px]">
+                  <h3 className="font-semibold text-gray-900 mb-2">{m.name}</h3>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p><span className="font-medium">District:</span> {m.district}</p>
+                    <p><span className="font-medium">Mineral:</span> {m.type}</p>
+                    <p><span className="font-medium">Area:</span> {m.operational_data?.area_hectares ?? m.operational_data?.area} ha</p>
+                    <p><span className="font-medium">Status:</span> 
+                      <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                        m.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {m.status}
+                      </span>
+                    </p>
+                    {m.risk_level && (
+                      <p><span className="font-medium">Risk:</span>
+                        <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                          m.risk_level === 'High' ? 'bg-red-100 text-red-700' :
+                          m.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {m.risk_level}
+                        </span>
+                      </p>
+                    )}
+                    {typeof m.risk_score === 'number' && (
+                      <p><span className="font-medium">Score:</span> {Number(m.risk_score).toFixed(1)}%</p>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => handleMarkerClick(m)}
+                    className="mt-3 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </Popup>
+              </Marker>
+            );
+          })
           </MarkerClusterGroup>
         ) : (
           mines.filter(m=> !(districtFilter && districtFilter.length>0) || (String(m.district || m.district_name || m.district_name)?.toLowerCase().indexOf(districtFilter.toLowerCase())>-1)).map((mine) => {
