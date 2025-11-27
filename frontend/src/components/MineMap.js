@@ -70,11 +70,12 @@ const MapUpdater = ({ center, zoom }) => {
   return null;
 };
 
-const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = "" }) => {
+const MineMap = ({ mines = [], selectedMine = null, onMineSelect, onExportVisible, onFilterChange, className = "" }) => {
   const [mapCenter, setMapCenter] = useState([11.1271, 78.6569]); // Tamil Nadu center
   const [mapZoom, setMapZoom] = useState(7);
   const [fullscreen, setFullscreen] = useState(false);
   const [mapInstance, setMapInstance] = useState(null);
+  const [districtFilter, setDistrictFilter] = useState('');
 
   // Normalizes mine objects coming from different API shapes so the map
   // component works with both old and new backends without breaking clicks.
@@ -119,9 +120,9 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
       return;
     }
     if (typeof window === 'undefined') return;
-    // If parent provided handler, use it
-    if (typeof window.__exportVisibleHandler === 'function') {
-      window.__exportVisibleHandler(visible);
+    // If parent provided handler via prop, use it
+    if (typeof onExportVisible === 'function') {
+      onExportVisible(visible);
       return;
     }
     // Fallback: build CSV and download
@@ -164,7 +165,7 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
 
         {MarkerClusterGroup ? (
           <MarkerClusterGroup>
-            {mines.map((mine) => {
+            {mines.filter(m=> !(districtFilter && districtFilter.length>0) || (String(m.district || m.district_name || m.district_name)?.toLowerCase().indexOf(districtFilter.toLowerCase())>-1)).map((mine) => {
               const m = normalize(mine);
               if (!m || m.latitude == null || m.longitude == null) return null;
               return (
@@ -215,7 +216,7 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
             })}
           </MarkerClusterGroup>
         ) : (
-          mines.map((mine) => {
+          mines.filter(m=> !(districtFilter && districtFilter.length>0) || (String(m.district || m.district_name || m.district_name)?.toLowerCase().indexOf(districtFilter.toLowerCase())>-1)).map((mine) => {
             const m = normalize(mine);
             if (!m || m.latitude == null || m.longitude == null) return null;
             return (
@@ -266,6 +267,28 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
           })
         )}
       </MapContainer>
+
+      {/* Quick district filter (top-left) */}
+      <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow p-2">
+        <label className="text-xs text-gray-700 font-medium">Filter district</label>
+        <div className="mt-1 flex space-x-2">
+          <input
+            value={districtFilter}
+            onChange={(e) => {
+              setDistrictFilter(e.target.value);
+              if (typeof onFilterChange === 'function') onFilterChange(e.target.value);
+            }}
+            placeholder="Type district name"
+            className="px-2 py-1 border rounded text-sm w-40"
+          />
+          <button
+            onClick={() => { setDistrictFilter(''); if (typeof onFilterChange === 'function') onFilterChange(''); }}
+            className="px-2 py-1 bg-gray-100 rounded text-sm"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
 
       {/* Map Legend */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-[1000]">
