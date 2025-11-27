@@ -1,10 +1,12 @@
 // API service for Tamil Nadu Rockfall Risk Prediction System
 import axios from 'axios';
 
-// API Configuration - Use relative URLs in development to leverage proxy
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? (process.env.REACT_APP_API_URL || 'http://localhost:8000')
-  : '';
+// API Configuration
+// Allow REACT_APP_API_URL to override the base URL in any environment.
+// In development an empty string uses the CRA proxy (package.json "proxy").
+const API_BASE_URL = process.env.REACT_APP_API_URL !== undefined
+  ? process.env.REACT_APP_API_URL
+  : (process.env.NODE_ENV === 'production' ? (process.env.REACT_APP_API_URL || 'http://localhost:8000') : '');
 const API_TIMEOUT = 30000; // 30 seconds
 
 // Create axios instance with default config

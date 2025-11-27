@@ -8,7 +8,7 @@ import {
   RefreshCw,
   ChevronDown
 } from 'lucide-react';
-import MineMap from './MineMap';
+import MineMap from './MineMapClean';
 import StatsCards from './StatsCards';
 import PerfectSearchFilters from './PerfectSearchFilters';
 import PerfectMineCard from './PerfectMineCard';

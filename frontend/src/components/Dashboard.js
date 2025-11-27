@@ -12,7 +12,7 @@ import {
   Grid,
   Map as MapIcon
 } from 'lucide-react';
-import MineMap from './MineMap';
+import MineMap from './MineMapClean';
 import { MineCardGrid } from './MineCard';
 import StatsCards from './StatsCards';
 import SearchFilters from './SearchFilters';
