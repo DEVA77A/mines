@@ -2,6 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+// Optional clustering package. Install in frontend before use:
+// npm install react-leaflet-markercluster
+let MarkerClusterGroup;
+try {
+  // dynamically require so the app still runs if package not installed
+  MarkerClusterGroup = require('react-leaflet-markercluster');
+  MarkerClusterGroup = MarkerClusterGroup && MarkerClusterGroup.default ? MarkerClusterGroup.default : MarkerClusterGroup;
+} catch (e) {
+  MarkerClusterGroup = null;
+}
 
 // Fix for default markers in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -64,6 +74,7 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
   const [mapCenter, setMapCenter] = useState([11.1271, 78.6569]); // Tamil Nadu center
   const [mapZoom, setMapZoom] = useState(7);
   const [fullscreen, setFullscreen] = useState(false);
+  const [mapInstance, setMapInstance] = useState(null);
 
   // Normalizes mine objects coming from different API shapes so the map
   // component works with both old and new backends without breaking clicks.
@@ -99,6 +110,35 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
     }
   };
 
+  const exportVisibleAsCSV = () => {
+    if (!mapInstance) return;
+    const bounds = mapInstance.getBounds();
+    const visible = mines.map(normalize).filter(m => m && m.latitude != null && m.longitude != null && bounds.contains([m.latitude, m.longitude]));
+    if (visible.length === 0) {
+      alert('No mines are visible in the current map view.');
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    // If parent provided handler, use it
+    if (typeof window.__exportVisibleHandler === 'function') {
+      window.__exportVisibleHandler(visible);
+      return;
+    }
+    // Fallback: build CSV and download
+    const headers = ['id','name','latitude','longitude','district','type','status','risk_level','risk_score'];
+    const rows = visible.map(m => headers.map(h => JSON.stringify(m[h] ?? '')).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `visible_mines_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={`relative ${className}`}>
       <MapContainer
@@ -106,6 +146,7 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
         zoom={mapZoom}
         style={{ height: '100%', width: '100%', minHeight: '400px' }}
         className="rounded-instagram shadow-card"
+        whenCreated={setMapInstance}
       >
         <MapUpdater center={mapCenter} zoom={mapZoom} />
         
@@ -121,60 +162,109 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
           opacity={0.6}
         />
 
-        {mines.map((mine) => {
-          const m = normalize(mine);
-          if (!m || m.latitude == null || m.longitude == null) return null;
-          return (
-            <Marker
-              key={m.id ?? `${m.latitude}-${m.longitude}`}
-              position={[m.latitude, m.longitude]}
-              icon={createRiskIcon(m.risk_level || 'Unknown')}
-              eventHandlers={{
-                click: () => handleMarkerClick(mine)
-              }}
-            >
-            <Popup className="custom-popup">
-              <div className="p-2 min-w-[200px]">
-                <h3 className="font-semibold text-gray-900 mb-2">{m.name}</h3>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p><span className="font-medium">District:</span> {m.district}</p>
-                  <p><span className="font-medium">Mineral:</span> {m.type}</p>
-                  <p><span className="font-medium">Area:</span> {m.operational_data?.area_hectares ?? m.operational_data?.area} ha</p>
-                  <p><span className="font-medium">Status:</span> 
-                    <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                      m.status === 'Active' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {m.status}
-                    </span>
-                  </p>
-                  {m.risk_level && (
-                    <p><span className="font-medium">Risk:</span>
+        {MarkerClusterGroup ? (
+          <MarkerClusterGroup>
+            {mines.map((mine) => {
+              const m = normalize(mine);
+              if (!m || m.latitude == null || m.longitude == null) return null;
+              return (
+                <Marker
+                  key={m.id ?? `${m.latitude}-${m.longitude}`}
+                  position={[m.latitude, m.longitude]}
+                  icon={createRiskIcon(m.risk_level || 'Unknown')}
+                  eventHandlers={{ click: () => handleMarkerClick(mine) }}
+                >
+                  <Popup className="custom-popup">
+                    <div className="p-2 min-w-[200px]">
+                      <h3 className="font-semibold text-gray-900 mb-2">{m.name}</h3>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p><span className="font-medium">District:</span> {m.district}</p>
+                        <p><span className="font-medium">Mineral:</span> {m.type}</p>
+                        <p><span className="font-medium">Area:</span> {m.operational_data?.area_hectares ?? m.operational_data?.area} ha</p>
+                        <p><span className="font-medium">Status:</span> 
+                          <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                            m.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {m.status}
+                          </span>
+                        </p>
+                        {m.risk_level && (
+                          <p><span className="font-medium">Risk:</span>
+                            <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                              m.risk_level === 'High' ? 'bg-red-100 text-red-700' :
+                              m.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                            }`}>
+                              {m.risk_level}
+                            </span>
+                          </p>
+                        )}
+                        {typeof m.risk_score === 'number' && (
+                          <p><span className="font-medium">Score:</span> {Number(m.risk_score).toFixed(1)}%</p>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => handleMarkerClick(mine)}
+                        className="mt-3 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MarkerClusterGroup>
+        ) : (
+          mines.map((mine) => {
+            const m = normalize(mine);
+            if (!m || m.latitude == null || m.longitude == null) return null;
+            return (
+              <Marker
+                key={m.id ?? `${m.latitude}-${m.longitude}`}
+                position={[m.latitude, m.longitude]}
+                icon={createRiskIcon(m.risk_level || 'Unknown')}
+                eventHandlers={{ click: () => handleMarkerClick(mine) }}
+              >
+              <Popup className="custom-popup">
+                <div className="p-2 min-w-[200px]">
+                  <h3 className="font-semibold text-gray-900 mb-2">{m.name}</h3>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p><span className="font-medium">District:</span> {m.district}</p>
+                    <p><span className="font-medium">Mineral:</span> {m.type}</p>
+                    <p><span className="font-medium">Area:</span> {m.operational_data?.area_hectares ?? m.operational_data?.area} ha</p>
+                    <p><span className="font-medium">Status:</span> 
                       <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                        m.risk_level === 'High' ? 'bg-red-100 text-red-700' :
-                        m.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
+                        m.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
                       }`}>
-                        {m.risk_level}
+                        {m.status}
                       </span>
                     </p>
-                  )}
-                  {typeof m.risk_score === 'number' && (
-                    <p><span className="font-medium">Score:</span> {Number(m.risk_score).toFixed(1)}%</p>
-                  )}
+                    {m.risk_level && (
+                      <p><span className="font-medium">Risk:</span>
+                        <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                          m.risk_level === 'High' ? 'bg-red-100 text-red-700' :
+                          m.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {m.risk_level}
+                        </span>
+                      </p>
+                    )}
+                    {typeof m.risk_score === 'number' && (
+                      <p><span className="font-medium">Score:</span> {Number(m.risk_score).toFixed(1)}%</p>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => handleMarkerClick(mine)}
+                    className="mt-3 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
+                  >
+                    View Details
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleMarkerClick(mine)}
-                  className="mt-3 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
-                >
-                  View Details
-                </button>
-              </div>
-            </Popup>
-            </Marker>
-          );
-        })}
+              </Popup>
+              </Marker>
+            );
+          })
+        )}
       </MapContainer>
 
       {/* Map Legend */}
@@ -220,6 +310,17 @@ const MineMap = ({ mines = [], selectedMine = null, onMineSelect, className = ""
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 3H5a2 2 0 00-2 2v3m0 8v3a2 2 0 002 2h3m8-16h3a2 2 0 012 2v3M16 21h3a2 2 0 002-2v-3" />
+          </svg>
+        </button>
+
+        {/* Export visible */}
+        <button
+          onClick={exportVisibleAsCSV}
+          className="mt-2 bg-white text-gray-700 p-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors duration-200"
+          title="Export visible mines"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14M5 12h14" />
           </svg>
         </button>
       </div>
