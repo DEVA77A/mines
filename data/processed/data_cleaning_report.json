@@ -1,0 +1,21 @@
+{
+  "original_records": 22,
+  "cleaned_records": 19,
+  "records_removed": 3,
+  "removal_percentage": 13.636363636363635,
+  "districts_count": 18,
+  "mineral_types": {
+    "Granite": 7,
+    "Limestone": 6,
+    "Iron Ore": 1,
+    "Marble": 1,
+    "Sandstone": 1,
+    "Silica Sand": 1,
+    "Sand": 1,
+    "Salt": 1
+  },
+  "active_mines": 16,
+  "closed_mines": 3,
+  "total_lease_area": 1060.9999999999998,
+  "avg_lease_area": 55.84210526315788
+}

@@ -1,0 +1,330 @@
+{
+  "multiclass": {
+    "random_forest": {
+      "accuracy": 0.999,
+      "cv_mean": 0.9981250000000002,
+      "cv_std": 1.1102230246251565e-16,
+      "classification_report": {
+        "High": {
+          "precision": 0.998998998998999,
+          "recall": 1.0,
+          "f1-score": 0.99949924887331,
+          "support": 1996.0
+        },
+        "Medium": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 4.0
+        },
+        "accuracy": 0.999,
+        "macro avg": {
+          "precision": 0.9994994994994995,
+          "recall": 0.75,
+          "f1-score": 0.8330829577699883,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.999001001001001,
+          "recall": 0.999,
+          "f1-score": 0.9988335837088967,
+          "support": 2000.0
+        }
+      }
+    },
+    "gradient_boosting": {
+      "accuracy": 0.9975,
+      "cv_mean": 0.997875,
+      "cv_std": 0.0004999999999999894,
+      "classification_report": {
+        "High": {
+          "precision": 0.9984977466199298,
+          "recall": 0.998997995991984,
+          "f1-score": 0.998747808665164,
+          "support": 1996.0
+        },
+        "Medium": {
+          "precision": 0.3333333333333333,
+          "recall": 0.25,
+          "f1-score": 0.2857142857142857,
+          "support": 4.0
+        },
+        "accuracy": 0.9975,
+        "macro avg": {
+          "precision": 0.6659155399766316,
+          "recall": 0.6244989979959921,
+          "f1-score": 0.6422310471897248,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.9971674177933567,
+          "recall": 0.9975,
+          "f1-score": 0.9973217416192622,
+          "support": 2000.0
+        }
+      }
+    },
+    "lightgbm": {
+      "accuracy": 0.998,
+      "cv_mean": 0.9938749999999998,
+      "cv_std": 0.004943429983321329,
+      "classification_report": {
+        "High": {
+          "precision": 0.998997995991984,
+          "recall": 0.998997995991984,
+          "f1-score": 0.998997995991984,
+          "support": 1996.0
+        },
+        "Medium": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 4.0
+        },
+        "accuracy": 0.998,
+        "macro avg": {
+          "precision": 0.7494989979959921,
+          "recall": 0.7494989979959921,
+          "f1-score": 0.7494989979959921,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.998,
+          "recall": 0.998,
+          "f1-score": 0.998,
+          "support": 2000.0
+        }
+      }
+    }
+  },
+  "binary": {
+    "random_forest": {
+      "accuracy": 0.999,
+      "auc": 1.0,
+      "cv_mean": 0.9981250000000002,
+      "cv_std": 1.1102230246251565e-16,
+      "classification_report": {
+        "0": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 4.0
+        },
+        "1": {
+          "precision": 0.998998998998999,
+          "recall": 1.0,
+          "f1-score": 0.99949924887331,
+          "support": 1996.0
+        },
+        "accuracy": 0.999,
+        "macro avg": {
+          "precision": 0.9994994994994995,
+          "recall": 0.75,
+          "f1-score": 0.8330829577699883,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.999001001001001,
+          "recall": 0.999,
+          "f1-score": 0.9988335837088967,
+          "support": 2000.0
+        }
+      }
+    },
+    "gradient_boosting": {
+      "accuracy": 0.9975,
+      "auc": 0.49480210420841686,
+      "cv_mean": 0.9981250000000002,
+      "cv_std": 0.000395284707521039,
+      "classification_report": {
+        "0": {
+          "precision": 0.3333333333333333,
+          "recall": 0.25,
+          "f1-score": 0.2857142857142857,
+          "support": 4.0
+        },
+        "1": {
+          "precision": 0.9984977466199298,
+          "recall": 0.998997995991984,
+          "f1-score": 0.998747808665164,
+          "support": 1996.0
+        },
+        "accuracy": 0.9975,
+        "macro avg": {
+          "precision": 0.6659155399766316,
+          "recall": 0.6244989979959921,
+          "f1-score": 0.6422310471897248,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.9971674177933567,
+          "recall": 0.9975,
+          "f1-score": 0.9973217416192622,
+          "support": 2000.0
+        }
+      }
+    },
+    "lightgbm": {
+      "accuracy": 0.998,
+      "auc": 0.998997995991984,
+      "cv_mean": 0.9938749999999998,
+      "cv_std": 0.004943429983321329,
+      "classification_report": {
+        "0": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 4.0
+        },
+        "1": {
+          "precision": 0.998997995991984,
+          "recall": 0.998997995991984,
+          "f1-score": 0.998997995991984,
+          "support": 1996.0
+        },
+        "accuracy": 0.998,
+        "macro avg": {
+          "precision": 0.7494989979959921,
+          "recall": 0.7494989979959921,
+          "f1-score": 0.7494989979959921,
+          "support": 2000.0
+        },
+        "weighted avg": {
+          "precision": 0.998,
+          "recall": 0.998,
+          "f1-score": 0.998,
+          "support": 2000.0
+        }
+      }
+    }
+  },
+  "feature_importance": {
+    "random_forest_multiclass": [
+      {
+        "feature": "environmental_risk_score",
+        "importance": 0.26070535566957037
+      },
+      {
+        "feature": "aspect_degrees",
+        "importance": 0.06624865252021919
+      },
+      {
+        "feature": "slope_risk_factor",
+        "importance": 0.057566121072828075
+      },
+      {
+        "feature": "rainfall_intensity",
+        "importance": 0.05472942269069226
+      },
+      {
+        "feature": "slope_degrees",
+        "importance": 0.04992685960807722
+      },
+      {
+        "feature": "weather_stress_index",
+        "importance": 0.04810491209124792
+      },
+      {
+        "feature": "slope_rainfall_interaction",
+        "importance": 0.04409804985148247
+      },
+      {
+        "feature": "terrain_ruggedness_index",
+        "importance": 0.03732869773123028
+      },
+      {
+        "feature": "temperature_stress",
+        "importance": 0.027266852280135114
+      },
+      {
+        "feature": "ucs_mpa",
+        "importance": 0.027060968847478852
+      }
+    ],
+    "gradient_boosting_multiclass": [
+      {
+        "feature": "rainfall_intensity",
+        "importance": 0.193688681999569
+      },
+      {
+        "feature": "environmental_risk_score",
+        "importance": 0.10806394476709087
+      },
+      {
+        "feature": "aspect_degrees",
+        "importance": 0.09198424057911195
+      },
+      {
+        "feature": "weathering_index",
+        "importance": 0.07753306102000679
+      },
+      {
+        "feature": "fracture_density",
+        "importance": 0.07609885138528125
+      },
+      {
+        "feature": "slope_degrees",
+        "importance": 0.06589491356259092
+      },
+      {
+        "feature": "terrain_ruggedness_index",
+        "importance": 0.0640184774244365
+      },
+      {
+        "feature": "stability_index",
+        "importance": 0.06126829552637871
+      },
+      {
+        "feature": "slope_rainfall_interaction",
+        "importance": 0.05727168135824571
+      },
+      {
+        "feature": "temperature_stress",
+        "importance": 0.04892027534995463
+      }
+    ],
+    "lightgbm_multiclass": [
+      {
+        "feature": "environmental_risk_score",
+        "importance": 348
+      },
+      {
+        "feature": "aspect_degrees",
+        "importance": 280
+      },
+      {
+        "feature": "slope_degrees",
+        "importance": 184
+      },
+      {
+        "feature": "rainfall_intensity",
+        "importance": 165
+      },
+      {
+        "feature": "weather_stress_index",
+        "importance": 156
+      },
+      {
+        "feature": "temperature_stress",
+        "importance": 108
+      },
+      {
+        "feature": "extreme_max_temp_c",
+        "importance": 104
+      },
+      {
+        "feature": "avg_rainfall_mm",
+        "importance": 95
+      },
+      {
+        "feature": "ucs_mpa",
+        "importance": 91
+      },
+      {
+        "feature": "weathering_index",
+        "importance": 79
+      }
+    ]
+  },
+  "training_date": "2025-11-28T10:01:10.436767"
+}

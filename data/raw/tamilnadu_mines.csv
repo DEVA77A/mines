@@ -1,0 +1,23 @@
+mine_name,district,mineral_type,lease_area_ha,latitude,longitude,status
+Hosur Granite Quarry,Krishnagiri,Granite,25.5,12.1265,77.8315,Active
+Salem Limestone Mine,Salem,Limestone,45.2,11.6643,78.146,Active
+Dharmapuri Iron Ore,Dharmapuri,Iron Ore,120.8,12.1357,78.1593,Active
+Krishnagiri Marble Mine,Krishnagiri,Marble,15.3,12.5265,78.2115,Closed
+Vellore Sandstone Quarry,Vellore,Sandstone,35.7,12.9165,79.1325,Active
+Tiruvannamalai Granite,Tiruvannamalai,Granite,28.9,12.2304,79.0747,Active
+Cuddalore Silica Sand,Cuddalore,Silica Sand,55.4,11.7593,79.7593,Active
+Perambalur Limestone,Perambalur,Limestone,78.3,11.2396,78.8875,Active
+Ariyalur Limestone,Ariyalur,Limestone,92.1,11.1574,79.2748,Active
+Karur Granite Quarry,Karur,Granite,32.6,10.9601,78.1374,Active
+Dindigul Granite Mine,Dindigul,Granite,41.8,10.3624,77.9824,Active
+Madurai Limestone,Madurai,Limestone,67.5,9.9252,78.1198,Closed
+Theni Granite Quarry,Theni,Granite,29.4,10.0127,77.4765,Active
+Virudhunagar Sand Mine,Virudhunagar,Sand,18.7,9.5915,77.9463,Active
+Tuticorin Salt Mine,Tuticorin,Salt,145.6,8.7642,78.1348,Active
+Tirunelveli Limestone,Tirunelveli,Limestone,89.3,8.7269,77.7567,Active
+Kanyakumari Sand Mine,Kanyakumari,Sand,22.1,8.0883,77.5385,Active
+Coimbatore Granite,Coimbatore,Granite,38.9,11.0168,76.9558,Active
+Erode Limestone Mine,Erode,Limestone,73.2,11.341,77.7172,Closed
+Namakkal Granite Quarry,Namakkal,Granite,26.8,11.2189,78.1677,Active
+Sea Mine Error,Kanyakumari,Salt,50.0,7.5,78.0,Active
+Outside TN Mine,Unknown,Granite,30.0,14.5,79.0,Active

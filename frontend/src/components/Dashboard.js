@@ -15,6 +15,7 @@ import {
 import MineMap from './MineMapClean';
 import { MineCardGrid } from './MineCard';
 import StatsCards from './StatsCards';
+import ModelMetrics from './ModelMetrics';
 import SearchFilters from './SearchFilters';
 import AlertsPanel from './AlertsPanel';
 import ExportModal from './ExportModal';
@@ -152,7 +153,14 @@ const Dashboard = () => {
       </div>
 
       {/* Statistics Cards */}
-      <StatsCards statistics={statistics} loading={loading} />
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <StatsCards statistics={statistics} loading={loading} />
+        </div>
+        <div>
+          <ModelMetrics />
+        </div>
+      </div>
 
       {/* Search and Filters */}
       <div className="card-instagram p-6">

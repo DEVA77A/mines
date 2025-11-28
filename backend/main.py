@@ -226,11 +226,37 @@ async def get_mines(
     if risk_category:
         filtered_data = filtered_data[filtered_data['risk_category'] == risk_category]
     
-    # Limit results
+    # Limit results (but keep a copy for predictions)
     filtered_data = filtered_data.head(limit)
     
     # Convert to response format
     mines_list = []
+    # If ML model is available, attempt batch predictions for returned mines
+    predictions = None
+    try:
+        if ml_models and 'rockfall_model' in ml_models and feature_columns and risk_data is not None:
+            model = ml_models['rockfall_model']
+            # merge to ensure feature columns exist on filtered_data
+            merged = filtered_data.merge(risk_data, left_index=True, right_on='mine_id', how='left')
+            # Build feature matrix
+            X_pred = pd.DataFrame()
+            for col in feature_columns:
+                if col in merged.columns:
+                    X_pred[col] = merged[col].fillna(0)
+                else:
+                    X_pred[col] = 0
+            if scaler is not None:
+                X_pred_scaled = scaler.transform(X_pred)
+                X_pred = pd.DataFrame(X_pred_scaled, columns=feature_columns)
+            probs = model.predict_proba(X_pred)
+            classes = model.classes_
+            pred_labels = model.predict(X_pred)
+            predictions = []
+            for p_label, p_probs in zip(pred_labels, probs):
+                predictions.append({'label': str(p_label), 'probs': {str(c): float(p) for c, p in zip(classes, p_probs)}, 'confidence': float(max(p_probs))})
+    except Exception as e:
+        logger.error(f"Batch prediction failed: {e}")
+
     for idx, mine in filtered_data.iterrows():
         mine_info = MineInfo(
             mine_id=int(idx + 1),
@@ -244,6 +270,14 @@ async def get_mines(
             risk_category=str(mine.get('risk_category', 'Unknown')),
             risk_score=float(mine.get('risk_score', 0.0)) if pd.notna(mine.get('risk_score')) else None
         )
+        # attach model prediction if available for this index
+        if predictions is not None:
+            try:
+                pred = predictions.pop(0)
+                mine_info.risk_category = pred['label']
+                mine_info.risk_score = mine_info.risk_score or None
+            except Exception:
+                pass
         mines_list.append(mine_info)
     
     return mines_list
@@ -389,6 +423,28 @@ async def get_statistics():
     stats['last_updated'] = datetime.now().isoformat()
     
     return stats
+
+
+@app.get("/model-metrics")
+async def get_model_metrics():
+    """Return saved model training results and basic metadata"""
+    global feature_columns
+    models_dir = Path(__file__).parent.parent / "models"
+    results_path = models_dir / "model_results.json"
+    summary = {}
+    if results_path.exists():
+        try:
+            with open(results_path, 'r') as f:
+                summary = json.load(f)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error reading model results: {e}")
+    else:
+        raise HTTPException(status_code=404, detail="Model results not found")
+
+    return {
+        'feature_columns_count': len(feature_columns),
+        'results': summary
+    }
 
 @app.get("/districts")
 async def get_districts():

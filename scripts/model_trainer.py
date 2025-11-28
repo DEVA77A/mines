@@ -72,7 +72,8 @@ class RockfallRiskPredictor:
         ]
         
         risk_labels = ['High', 'Medium', 'Low']
-        df['risk_category'] = np.select(risk_conditions, risk_labels)
+        # Ensure default is a string to avoid dtype promotion issues when choices are strings
+        df['risk_category'] = np.select(risk_conditions, risk_labels, default='Low')
         
         # Create binary risk labels for some models (High risk vs Others)
         df['high_risk_binary'] = (df['risk_category'] == 'High').astype(int)
@@ -150,8 +151,11 @@ class RockfallRiskPredictor:
         # Encode categorical features
         for cat_feature in categorical_features:
             if cat_feature in df.columns:
+                # Convert categorical to object first, then fill, then cast to str
+                # This avoids Pandas Categorical setitem errors when inserting a new category
+                vals = df[cat_feature].astype(object).fillna('Unknown').astype(str)
                 le = LabelEncoder()
-                df[f'{cat_feature}_encoded'] = le.fit_transform(df[cat_feature].fillna('Unknown'))
+                df[f'{cat_feature}_encoded'] = le.fit_transform(vals)
                 self.label_encoders[cat_feature] = le
         
         # Select final features for modeling
