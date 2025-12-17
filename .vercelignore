@@ -1,0 +1,11 @@
+# Ignore Python backend for Vercel deployment
+/backend/
+/models/
+/scripts/
+/data/
+*.db
+*.pkl
+*.py
+__pycache__/
+.venv/
+requirements.txt
