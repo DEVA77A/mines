@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Download, 
@@ -8,6 +8,7 @@ import {
   RefreshCw,
   ChevronDown
 } from 'lucide-react';
+import PredictTab from './PredictTab';
 import MineMap from './MineMapClean';
 import StatsCards from './StatsCards';
 import PerfectSearchFilters from './PerfectSearchFilters';
@@ -16,6 +17,7 @@ import AlertsPanel from './AlertsPanel';
 import ExportModal from './ExportModal';
 import { usePerfectData } from '../contexts/PerfectDataContext';
 import toast from 'react-hot-toast';
+import { ViewModeContext } from '../contexts/ViewModeContext';
 
 const PerfectDashboard = () => {
   const { 
@@ -31,7 +33,7 @@ const PerfectDashboard = () => {
     exportMineData
   } = usePerfectData();
   
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
+  const { viewMode, setViewMode } = useContext(ViewModeContext);
   const [showAlerts, setShowAlerts] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [sortBy, setSortBy] = useState('risk_score'); // 'risk_score', 'name', 'district', 'last_updated'
@@ -149,36 +151,36 @@ const PerfectDashboard = () => {
   }, [error]);
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 -m-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Tamil Nadu Mine Monitoring Dashboard
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight">
+            Tamil Nadu Mine Monitoring
           </h1>
-          <p className="text-gray-600 mt-1">
-            Real-time monitoring of {mines.length} mines across Tamil Nadu with perfect land placement
+          <p className="text-slate-600 mt-2 text-lg font-medium">
+            Real-time AI surveillance of <span className="font-bold text-blue-700">{mines.length}</span> mines with precision land mapping
           </p>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           {/* Manual Monitoring Button */}
           <button
             onClick={handleManualMonitoring}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="group flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 font-medium"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
             <span>Update Data</span>
           </button>
           
           {/* View Mode Toggle */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-white/50 backdrop-blur-sm p-1.5 rounded-xl border border-white/60 shadow-inner">
             <button
               onClick={() => handleViewModeChange('grid')}
-              className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
                 viewMode === 'grid'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-blue-700 shadow-md scale-105'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/30'
               }`}
             >
               <Grid className="w-4 h-4" />
@@ -186,21 +188,32 @@ const PerfectDashboard = () => {
             </button>
             <button
               onClick={() => handleViewModeChange('map')}
-              className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
                 viewMode === 'map'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-blue-700 shadow-md scale-105'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/30'
               }`}
             >
               <MapIcon className="w-4 h-4" />
               <span>Map</span>
+            </button>
+            <button
+              onClick={() => handleViewModeChange('predict')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                viewMode === 'predict'
+                  ? 'bg-white text-blue-700 shadow-md scale-105'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/30'
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Predict</span>
             </button>
           </div>
           
           {/* Export Button */}
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 font-medium"
           >
             <Download className="w-4 h-4" />
             <span>Export</span>
@@ -210,81 +223,92 @@ const PerfectDashboard = () => {
       
       {/* Statistics Cards */}
       {analytics && (
-        <StatsCards 
-          totalMines={analytics.total_mines}
-          highRiskMines={analytics.risk_distribution?.high || 0}
-          mediumRiskMines={analytics.risk_distribution?.medium || 0}
-          lowRiskMines={analytics.risk_distribution?.low || 0}
-          activeMines={analytics.status_distribution?.active || 0}
-          districtsCount={analytics.districts_covered || 0}
-          lastUpdated={analytics.last_updated}
-        />
+        <div className="transform hover:scale-[1.01] transition-transform duration-500">
+          <StatsCards 
+            totalMines={analytics.total_mines}
+            highRiskMines={analytics.risk_distribution?.high || 0}
+            mediumRiskMines={analytics.risk_distribution?.medium || 0}
+            lowRiskMines={analytics.risk_distribution?.low || 0}
+            activeMines={analytics.status_distribution?.active || 0}
+            districtsCount={analytics.districts_covered || 0}
+            lastUpdated={analytics.last_updated}
+          />
+        </div>
       )}
       
       {/* Search and Filters */}
       <PerfectSearchFilters />
       
       {/* Content Area */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Sort and View Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/50 shadow-sm">
+          <div className="flex items-center space-x-6">
             {/* Sort Controls */}
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium text-gray-700">Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="risk_score">Risk Score</option>
-                <option value="name">Name</option>
-                <option value="district">District</option>
-                <option value="last_updated">Last Updated</option>
-              </select>
+            <div className="flex items-center space-x-3">
+              <label className="text-sm font-semibold text-slate-600">Sort by:</label>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="appearance-none pl-4 pr-10 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm cursor-pointer hover:border-blue-300 transition-colors"
+                >
+                  <option value="risk_score">Risk Score</option>
+                  <option value="name">Name</option>
+                  <option value="district">District</option>
+                  <option value="last_updated">Last Updated</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
               
               <button
                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="p-1 text-gray-600 hover:text-gray-900"
+                className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all shadow-sm"
               >
-                <ChevronDown className={`w-4 h-4 transition-transform ${
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${
                   sortOrder === 'asc' ? 'rotate-180' : ''
                 }`} />
               </button>
             </div>
             
             {/* Page Size */}
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium text-gray-700">Show:</label>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="px-3 py-1 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-              <span className="text-sm text-gray-600">per page</span>
+            <div className="flex items-center space-x-3">
+              <label className="text-sm font-semibold text-slate-600">Show:</label>
+              <div className="relative">
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="appearance-none pl-4 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm cursor-pointer hover:border-blue-300 transition-colors"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+              </div>
+              <span className="text-sm text-slate-500 font-medium">per page</span>
             </div>
           </div>
           
           {/* Results Info */}
-          <div className="text-sm text-gray-600">
-            Showing {startIndex}-{endIndex} of {sortedMines.length} mines
+          <div className="text-sm font-medium text-slate-500 bg-slate-100/50 px-4 py-2 rounded-lg">
+            Showing <span className="text-slate-900">{startIndex}-{endIndex}</span> of <span className="text-slate-900">{sortedMines.length}</span> mines
           </div>
         </div>
         
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-              <span className="text-lg text-gray-600">Loading mines...</span>
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+              <span className="text-lg font-medium text-slate-600">Loading mine data...</span>
             </div>
           </div>
         )}
@@ -298,7 +322,7 @@ const PerfectDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
               >
                 {/* Mine Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -314,25 +338,27 @@ const PerfectDashboard = () => {
                 
                 {/* No Results */}
                 {paginatedMines.length === 0 && (
-                  <div className="text-center py-12">
-                    <MapPin className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="text-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300">
+                    <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <MapPin className="w-10 h-10 text-slate-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">
                       No mines found
                     </h3>
-                    <p className="text-gray-600">
-                      Try adjusting your search or filter criteria
+                    <p className="text-slate-500 max-w-md mx-auto">
+                      We couldn't find any mines matching your current filters. Try adjusting your search criteria or clearing filters.
                     </p>
                   </div>
                 )}
               </motion.div>
-            ) : (
+            ) : viewMode === 'map' ? (
               <motion.div
                 key="map"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden"
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.4 }}
+                className="h-[700px] bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-200"
               >
                 <MineMap
                   mines={sortedMines}
@@ -341,17 +367,27 @@ const PerfectDashboard = () => {
                   showAllMines={true}
                 />
               </motion.div>
+            ) : (
+              <motion.div
+                key="predict"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <PredictTab />
+              </motion.div>
             )}
           </AnimatePresence>
         )}
         
         {/* Pagination */}
         {!loading && totalPages > 1 && viewMode === 'grid' && (
-          <div className="flex items-center justify-center space-x-2 mt-8">
+          <div className="flex items-center justify-center space-x-2 mt-10 pb-10">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
             >
               Previous
             </button>
@@ -364,10 +400,10 @@ const PerfectDashboard = () => {
                 <button
                   key={pageNumber}
                   onClick={() => handlePageChange(pageNumber)}
-                  className={`px-3 py-2 border rounded-lg ${
+                  className={`w-10 h-10 rounded-lg font-medium transition-all ${
                     currentPage === pageNumber
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-110'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                   }`}
                 >
                   {pageNumber}
@@ -378,7 +414,7 @@ const PerfectDashboard = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
             >
               Next
             </button>

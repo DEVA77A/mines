@@ -51,8 +51,15 @@ class EnhancedApiService {
       if (filters.search) params.append('search', filters.search);
       if (filters.limit) params.append('limit', filters.limit.toString());
       
-      const response = await apiClient.get(`/api/mines?${params.toString()}`);
-      
+      // Try the /api prefixed route first, then fallback to non-prefixed route
+      let response;
+      try {
+        response = await apiClient.get(`/api/mines?${params.toString()}`);
+      } catch (err) {
+        console.warn('Primary /api/mines failed, trying /mines', err?.message);
+        response = await apiClient.get(`/mines?${params.toString()}`);
+      }
+
       console.log(`📊 Retrieved ${response.data.length} mines from API`);
       return response.data;
       
@@ -171,8 +178,21 @@ class EnhancedApiService {
   // Trigger manual monitoring
   async triggerManualMonitoring() {
     try {
-      const response = await apiClient.post('/api/manual-monitoring');
-      return response.data;
+      // Try multiple endpoint variants to support different backend roots
+      const endpoints = ['/api/manual-monitoring', '/manual-monitoring', '/api/monitoring/manual', '/monitoring/manual'];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const response = await apiClient.post(ep);
+          return response.data;
+        } catch (err) {
+          lastErr = err;
+          console.warn(`Attempt to ${ep} failed:`, err.message);
+        }
+      }
+
+      // If none succeeded, throw the last error
+      throw lastErr || new Error('All manual-monitoring endpoints failed');
     } catch (error) {
       console.error('❌ Error triggering monitoring:', error);
       throw new Error(`Manual monitoring failed: ${error.message}`);

@@ -1,0 +1,110 @@
+/* Futuristic theme: neon accents, glass panels, soft glows */
+:root {
+  --neo-bg: linear-gradient(180deg, #020617 0%, #07102a 100%);
+  --neo-panel: rgba(255,255,255,0.03);
+  --neo-card: rgba(255,255,255,0.035);
+  --neo-accent: #7cf7ff;
+  --neo-accent-2: #9b7cff;
+  --neo-glow: 0 8px 40px rgba(124,247,255,0.06);
+  --neo-border: rgba(124,124,255,0.12);
+  --neo-text: #e6f7ff;
+  --neo-muted: #9bb0c8;
+}
+
+body.futuristic-theme {
+  background: var(--neo-bg) !important;
+  color: var(--neo-text) !important;
+}
+
+/* Panels/cards */
+.futuristic-theme .card-instagram,
+.futuristic-theme .card-gradient,
+.futuristic-theme .glass-effect,
+.futuristic-theme .modal,
+.futuristic-theme .popover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) !important;
+  background-color: var(--neo-card) !important;
+  border: 1px solid var(--neo-border) !important;
+  box-shadow: var(--neo-glow) !important;
+  color: var(--neo-text) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Headings & text */
+.futuristic-theme h1, .futuristic-theme h2, .futuristic-theme h3 {
+  color: var(--neo-text) !important;
+  text-shadow: 0 6px 20px rgba(124,124,255,0.06);
+}
+
+.futuristic-theme p, .futuristic-theme span, .futuristic-theme li {
+  color: var(--neo-muted) !important;
+}
+
+/* Buttons */
+.futuristic-theme .btn-primary {
+  background: linear-gradient(90deg, rgba(124,124,255,0.18), rgba(124,247,255,0.18)) !important;
+  color: #021025 !important;
+  border: 1px solid rgba(124,247,255,0.16) !important;
+  box-shadow: 0 6px 22px rgba(156,124,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.15);
+}
+
+.futuristic-theme .btn-secondary {
+  background: transparent !important;
+  color: var(--neo-accent) !important;
+  border: 1px solid rgba(124,247,255,0.08) !important;
+}
+
+/* Neon accent elements */
+.futuristic-accent {
+  color: var(--neo-accent) !important;
+  text-shadow: 0 6px 18px rgba(124,247,255,0.06);
+}
+
+/* Map modifications (Leaflet) */
+.futuristic-theme .leaflet-popup-content-wrapper {
+  background: linear-gradient(180deg, rgba(2,6,23,0.9), rgba(4,10,35,0.85)) !important;
+  border: 1px solid rgba(124,124,255,0.06) !important;
+  color: var(--neo-text) !important;
+}
+
+.futuristic-theme .leaflet-control {
+  background: rgba(5,10,30,0.6) !important;
+  border: 1px solid rgba(124,124,255,0.04) !important;
+}
+
+/* Cards hover */
+.futuristic-theme .card-instagram:hover, .futuristic-theme .card-gradient:hover {
+  transform: translateY(-6px) scale(1.01);
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1);
+  box-shadow: 0 18px 45px rgba(7,17,40,0.6), 0 6px 30px rgba(124,124,255,0.06) !important;
+}
+
+/* Custom cursor brightened for theme */
+.futuristic-theme .custom-cursor { background: var(--neo-accent) !important; box-shadow: 0 8px 30px rgba(124,247,255,0.18) !important; }
+
+/* Small UI touches */
+.futuristic-theme .navbar, .futuristic-theme header, .futuristic-theme .topbar {
+  background: linear-gradient(90deg, rgba(3,6,20,0.6), rgba(6,12,30,0.6)) !important;
+  border-bottom: 1px solid rgba(124,124,255,0.04) !important;
+}
+
+/* Neon outline for focused inputs */
+.futuristic-theme .input-instagram:focus {
+  box-shadow: 0 4px 24px rgba(124,247,255,0.08) !important;
+  border-color: rgba(124,247,255,0.12) !important;
+}
+
+/* Subtle animated gradient lines for hero */
+.futuristic-hero-lines {
+  position: absolute; inset: 0; pointer-events: none; z-index: 5; opacity: .9;
+  background-image: linear-gradient(90deg, rgba(124,247,255,0.02) 0%, rgba(155,124,255,0.02) 50%, rgba(124,247,255,0.02) 100%);
+  background-size: 200% 100%;
+  animation: neo-flow 10s linear infinite;
+}
+@keyframes neo-flow { from { background-position: 0 0 } to { background-position: -200% 0 } }
+
+/* Tighter spacing for futuristic feel */
+.futuristic-theme .dashboard-grid { gap: 10px !important; }
+
+/* Utility to highlight important metric */
+.futuristic-highlight { background: linear-gradient(90deg, rgba(124,247,255,0.06), rgba(155,124,255,0.06)); border-left: 3px solid var(--neo-accent); }

@@ -41,12 +41,14 @@ const LoadingScreen = ({
       exit={{ opacity: 0 }}
       className={`fixed inset-0 z-50 flex items-center justify-center transition-colors duration-500 ${
         isDarkMode 
-          ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900' 
-          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+          ? 'bg-slate-900' 
+          : 'bg-slate-50'
       }`}
     >
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
+        <div className={`absolute inset-0 ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`} />
+        <div className={`absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20`} />
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
@@ -71,13 +73,17 @@ const LoadingScreen = ({
         ))}
       </div>
 
-      <div className="relative z-10 text-center max-w-md mx-auto px-6">
+      <div className={`relative z-10 text-center max-w-md mx-auto px-8 py-12 rounded-3xl border shadow-2xl backdrop-blur-xl ${
+        isDarkMode 
+          ? 'bg-slate-800/40 border-slate-700/50' 
+          : 'bg-white/40 border-white/50'
+      }`}>
         {/* Logo */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl"
+          className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/30"
         >
           <span className="text-4xl">🏔️</span>
         </motion.div>
@@ -87,8 +93,8 @@ const LoadingScreen = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className={`text-3xl font-bold mb-4 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
+          className={`text-3xl font-bold mb-2 tracking-tight ${
+            isDarkMode ? 'text-white' : 'text-slate-800'
           }`}
         >
           Rockfall AI System
@@ -98,8 +104,8 @@ const LoadingScreen = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className={`text-lg mb-8 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          className={`text-sm font-medium mb-8 ${
+            isDarkMode ? 'text-slate-400' : 'text-slate-500'
           }`}
         >
           Tamil Nadu Mining Safety Platform
@@ -112,7 +118,7 @@ const LoadingScreen = ({
           transition={{ delay: 0.6 }}
           className="mb-8"
         >
-          <div className="relative w-32 h-32 mx-auto">
+          <div className="relative w-24 h-24 mx-auto">
             {/* Outer Ring */}
             <motion.div
               animate={{ rotate: 360 }}
@@ -124,14 +130,14 @@ const LoadingScreen = ({
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-4 border-4 border-transparent border-t-purple-500 rounded-full"
+              className="absolute inset-3 border-4 border-transparent border-t-indigo-500 rounded-full"
             />
             
             {/* Center Dot */}
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="absolute inset-1/2 w-4 h-4 -ml-2 -mt-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full"
+              className="absolute inset-1/2 w-3 h-3 -ml-1.5 -mt-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-lg shadow-blue-500/50"
             />
           </div>
         </motion.div>
@@ -143,24 +149,24 @@ const LoadingScreen = ({
           transition={{ delay: 0.8 }}
           className="mb-6"
         >
-          <div className={`w-full h-2 rounded-full overflow-hidden ${
-            isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+          <div className={`w-full h-1.5 rounded-full overflow-hidden ${
+            isDarkMode ? 'bg-slate-700' : 'bg-slate-200'
           }`}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${currentStepData?.progress || progress}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+              className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
             />
           </div>
-          <div className="flex justify-between mt-2 text-sm">
-            <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+          <div className="flex justify-between mt-2 text-xs font-medium">
+            <span className={isDarkMode ? 'text-slate-500' : 'text-slate-400'}>
               0%
             </span>
-            <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
               {Math.round(currentStepData?.progress || progress)}%
             </span>
-            <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+            <span className={isDarkMode ? 'text-slate-500' : 'text-slate-400'}>
               100%
             </span>
           </div>
@@ -173,8 +179,8 @@ const LoadingScreen = ({
           key={currentStep}
           className="mb-8"
         >
-          <p className={`text-lg font-medium mb-2 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
+          <p className={`text-base font-semibold mb-3 ${
+            isDarkMode ? 'text-white' : 'text-slate-800'
           }`}>
             {currentStepData?.name || message}
           </p>
@@ -187,12 +193,12 @@ const LoadingScreen = ({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                   index <= currentStep 
-                    ? 'bg-blue-500' 
+                    ? 'bg-blue-500 scale-125' 
                     : isDarkMode 
-                    ? 'bg-gray-600' 
-                    : 'bg-gray-300'
+                    ? 'bg-slate-700' 
+                    : 'bg-slate-300'
                 }`}
               />
             ))}
@@ -204,14 +210,15 @@ const LoadingScreen = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
-          className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+          className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}
         >
-          <p className="mb-2">💡 Did you know?</p>
+          <p className="mb-1 uppercase tracking-wider text-[10px] opacity-70">Did you know?</p>
           <motion.p
             key={currentStep}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
+            className="italic"
           >
             {currentStep === 0 && "Tamil Nadu has over 1,500 active mining locations"}
             {currentStep === 1 && "Our AI analyzes 15+ environmental factors"}
@@ -221,23 +228,6 @@ const LoadingScreen = ({
             {currentStep >= 5 && "Ready to protect Tamil Nadu's mining operations!"}
           </motion.p>
         </motion.div>
-
-        {/* Emergency Skip Button */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.7 }}
-          whileHover={{ opacity: 1, scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ delay: 3 }}
-          className={`mt-8 px-4 py-2 text-sm rounded-lg border transition-colors ${
-            isDarkMode 
-              ? 'border-gray-600 text-gray-400 hover:text-white hover:border-gray-500' 
-              : 'border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400'
-          }`}
-          onClick={() => window.location.reload()}
-        >
-          Skip Loading
-        </motion.button>
       </div>
     </motion.div>
   );

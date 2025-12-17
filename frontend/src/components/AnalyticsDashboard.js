@@ -106,41 +106,48 @@ const AnalyticsDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
             Analytics Dashboard
           </h1>
-          <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
             Comprehensive insights into rockfall risk patterns and trends
           </p>
         </div>
         
         <div className="flex items-center space-x-3">
           {/* Time Range Selector */}
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
-          >
-            {timeRangeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className={`px-4 py-2.5 pr-10 border rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm ${
+                isDarkMode 
+                  ? 'bg-slate-800 border-slate-600 text-white' 
+                  : 'bg-white border-slate-200 text-slate-700'
+              }`}
+            >
+              {timeRangeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <svg className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
           
           {/* Export Button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="btn-primary"
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
           >
             Export Report
           </motion.button>
@@ -175,7 +182,7 @@ const AnalyticsDashboard = () => {
           trend="increasing"
           trendValue="15.2"
           icon={CheckCircle}
-          color="green"
+          color="emerald"
           isDarkMode={isDarkMode}
         />
         
@@ -193,16 +200,16 @@ const AnalyticsDashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Risk Trend Chart */}
-        <div className={`p-6 rounded-2xl border ${
+        <div className={`p-8 rounded-3xl border shadow-xl backdrop-blur-md ${
           isDarkMode 
-            ? 'bg-gray-800/50 border-gray-700' 
-            : 'bg-white border-gray-200'
+            ? 'bg-slate-800/60 border-slate-700/50' 
+            : 'bg-white/60 border-white/50'
         }`}>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <div className="flex items-center justify-between mb-8">
+            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
               Risk Score Trend
             </h3>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
               {metricOptions.map((metric) => {
                 const Icon = metric.icon;
                 return (
@@ -211,12 +218,12 @@ const AnalyticsDashboard = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedMetric(metric.value)}
-                    className={`p-2 rounded-lg transition-colors ${
+                    className={`p-2 rounded-lg transition-all ${
                       selectedMetric === metric.value
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-white dark:bg-slate-600 text-blue-600 shadow-sm'
                         : isDarkMode
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'text-slate-400 hover:text-slate-200'
+                        : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -236,58 +243,58 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* District Risk Distribution */}
-        <div className={`p-6 rounded-2xl border ${
+        <div className={`p-8 rounded-3xl border shadow-xl backdrop-blur-md ${
           isDarkMode 
-            ? 'bg-gray-800/50 border-gray-700' 
-            : 'bg-white border-gray-200'
+            ? 'bg-slate-800/60 border-slate-700/50' 
+            : 'bg-white/60 border-white/50'
         }`}>
-          <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h3 className={`text-xl font-bold mb-8 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
             District Risk Distribution
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
             {Object.entries(analyticsData.districtRisk || {}).map(([district, data]) => {
               const avgRisk = data.total / data.count;
               const riskLevel = avgRisk > 0.7 ? 'high' : avgRisk > 0.4 ? 'medium' : 'low';
-              const riskColor = riskLevel === 'high' ? 'red' : riskLevel === 'medium' ? 'yellow' : 'green';
+              const riskColor = riskLevel === 'high' ? 'red' : riskLevel === 'medium' ? 'orange' : 'emerald';
               
               return (
                 <motion.div
                   key={district}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`p-4 rounded-xl border ${
+                  className={`p-4 rounded-2xl border transition-all hover:shadow-md ${
                     isDarkMode 
-                      ? 'bg-gray-700/50 border-gray-600' 
-                      : 'bg-gray-50 border-gray-200'
+                      ? 'bg-slate-700/30 border-slate-600 hover:bg-slate-700/50' 
+                      : 'bg-white/50 border-slate-100 hover:bg-white'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                       {district}
                     </h4>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${riskColor}-100 text-${riskColor}-800 dark:bg-${riskColor}-900/20 dark:text-${riskColor}-300`}>
-                      {riskLevel.toUpperCase()}
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-${riskColor}-100 text-${riskColor}-700 dark:bg-${riskColor}-900/30 dark:text-${riskColor}-300`}>
+                      {riskLevel}
                     </span>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm">
-                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-                      {data.count} mines • {data.highRisk} high risk
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>
+                      <span className="font-bold">{data.count}</span> mines • <span className="font-bold">{data.highRisk}</span> high risk
                     </span>
-                    <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {(avgRisk * 100).toFixed(1)}%
+                    <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                      {(avgRisk * 100).toFixed(1)}% Risk
                     </span>
                   </div>
                   
-                  <div className={`mt-2 h-2 rounded-full overflow-hidden ${
-                    isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+                  <div className={`h-2.5 rounded-full overflow-hidden ${
+                    isDarkMode ? 'bg-slate-600' : 'bg-slate-100'
                   }`}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${avgRisk * 100}%` }}
                       transition={{ delay: 0.2, duration: 0.8 }}
-                      className={`h-full bg-${riskColor}-500 rounded-full`}
+                      className={`h-full bg-${riskColor}-500 rounded-full shadow-sm`}
                     />
                   </div>
                 </motion.div>
@@ -298,32 +305,32 @@ const AnalyticsDashboard = () => {
       </div>
 
       {/* Detailed Analytics Table */}
-      <div className={`p-6 rounded-2xl border ${
+      <div className={`p-8 rounded-3xl border shadow-xl backdrop-blur-md overflow-hidden ${
         isDarkMode 
-          ? 'bg-gray-800/50 border-gray-700' 
-          : 'bg-white border-gray-200'
+          ? 'bg-slate-800/60 border-slate-700/50' 
+          : 'bg-white/60 border-white/50'
       }`}>
-        <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Recent Activity
+        <h3 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+          Recent Activity Log
         </h3>
         
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                <th className={`text-left py-3 px-4 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              <tr className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                <th className={`text-left py-4 px-6 font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Date
                 </th>
-                <th className={`text-left py-3 px-4 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <th className={`text-left py-4 px-6 font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Risk Score
                 </th>
-                <th className={`text-left py-3 px-4 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <th className={`text-left py-4 px-6 font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Alerts
                 </th>
-                <th className={`text-left py-3 px-4 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <th className={`text-left py-4 px-6 font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Inspections
                 </th>
-                <th className={`text-left py-3 px-4 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <th className={`text-left py-4 px-6 font-bold text-sm uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Trend
                 </th>
               </tr>
@@ -335,33 +342,44 @@ const AnalyticsDashboard = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} hover:${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} transition-colors`}
+                  className={`border-b last:border-0 ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-700/30' : 'border-slate-100 hover:bg-white/80'} transition-colors`}
                 >
-                  <td className={`py-4 px-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {new Date(day.date).toLocaleDateString()}
+                  <td className={`py-4 px-6 font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                    {new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </td>
-                  <td className={`py-4 px-4 font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {(day.risk_score * 100).toFixed(1)}%
+                  <td className={`py-4 px-6`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        day.risk_score > 0.7 ? 'bg-red-500' : day.risk_score > 0.4 ? 'bg-orange-500' : 'bg-emerald-500'
+                      }`} />
+                      <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        {(day.risk_score * 100).toFixed(1)}%
+                      </span>
+                    </div>
                   </td>
-                  <td className={`py-4 px-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {day.alerts}
+                  <td className={`py-4 px-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                    {day.alerts > 0 ? (
+                      <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs font-bold">{day.alerts} Alerts</span>
+                    ) : (
+                      <span className="text-slate-400">-</span>
+                    )}
                   </td>
-                  <td className={`py-4 px-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <td className={`py-4 px-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                     {day.inspections}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-4 px-6">
                     <div className="flex items-center space-x-2">
                       {day.trend > 0 ? (
                         <TrendingUp className="w-4 h-4 text-red-500" />
                       ) : day.trend < 0 ? (
-                        <TrendingDown className="w-4 h-4 text-green-500" />
+                        <TrendingDown className="w-4 h-4 text-emerald-500" />
                       ) : (
                         <div className="w-4 h-4" />
                       )}
-                      <span className={`text-sm ${
+                      <span className={`text-sm font-bold ${
                         day.trend > 0 ? 'text-red-500' : 
-                        day.trend < 0 ? 'text-green-500' : 
-                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                        day.trend < 0 ? 'text-emerald-500' : 
+                        isDarkMode ? 'text-slate-400' : 'text-slate-500'
                       }`}>
                         {Math.abs(day.trend * 100).toFixed(1)}%
                       </span>
@@ -387,36 +405,36 @@ const SummaryCard = ({ title, value, trend, trendValue, icon: Icon, color, isDar
 
   const getTrendColor = () => {
     if (trend === 'increasing' && color === 'red') return 'text-red-500';
-    if (trend === 'increasing' && color === 'green') return 'text-green-500';
-    if (trend === 'decreasing' && color === 'red') return 'text-green-500';
-    if (trend === 'decreasing' && color === 'green') return 'text-red-500';
-    return isDarkMode ? 'text-gray-400' : 'text-gray-600';
+    if (trend === 'increasing' && color === 'emerald') return 'text-emerald-500';
+    if (trend === 'decreasing' && color === 'red') return 'text-emerald-500';
+    if (trend === 'decreasing' && color === 'emerald') return 'text-red-500';
+    return isDarkMode ? 'text-slate-400' : 'text-slate-500';
   };
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      className={`p-6 rounded-2xl border transition-all ${
+      whileHover={{ scale: 1.02, y: -5 }}
+      className={`p-6 rounded-3xl border shadow-lg backdrop-blur-md transition-all ${
         isDarkMode 
-          ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800/70' 
-          : 'bg-white border-gray-200 hover:shadow-lg'
+          ? 'bg-slate-800/60 border-slate-700/50 hover:bg-slate-800/80' 
+          : 'bg-white/60 border-white/50 hover:shadow-xl hover:bg-white/80'
       }`}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 rounded-xl bg-${color}-500 bg-opacity-10 flex items-center justify-center`}>
-          <Icon className={`w-6 h-6 text-${color}-500`} />
+        <div className={`w-14 h-14 rounded-2xl bg-${color}-500/10 flex items-center justify-center shadow-inner`}>
+          <Icon className={`w-7 h-7 text-${color}-500`} />
         </div>
-        <div className={`flex items-center space-x-1 text-sm ${getTrendColor()}`}>
+        <div className={`flex items-center space-x-1 text-sm font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700/50 ${getTrendColor()}`}>
           {getTrendIcon()}
           <span>{trendValue}%</span>
         </div>
       </div>
       
-      <div className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`text-4xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
         {value}
       </div>
       
-      <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+      <div className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
         {title}
       </div>
     </motion.div>
@@ -428,8 +446,8 @@ const TrendChart = ({ data, metric, isDarkMode }) => {
   if (!data || data.length === 0) {
     return (
       <div className="text-center">
-        <BarChart3 className={`w-12 h-12 mx-auto mb-2 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-        <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>No data available</p>
+        <BarChart3 className={`w-12 h-12 mx-auto mb-2 ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`} />
+        <p className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>No data available</p>
       </div>
     );
   }
@@ -437,7 +455,7 @@ const TrendChart = ({ data, metric, isDarkMode }) => {
   const maxValue = Math.max(...data.map(d => d[metric] || 0));
   
   return (
-    <div className="w-full h-full flex items-end justify-between space-x-2">
+    <div className="w-full h-full flex items-end justify-between space-x-3 px-4 pb-2">
       {data.map((point, index) => {
         const height = ((point[metric] || 0) / maxValue) * 100;
         return (
@@ -445,10 +463,18 @@ const TrendChart = ({ data, metric, isDarkMode }) => {
             key={index}
             initial={{ height: 0 }}
             animate={{ height: `${height}%` }}
-            transition={{ delay: index * 0.1 }}
-            className="flex-1 bg-blue-500 rounded-t-md min-h-[4px] max-w-[20px]"
-            title={`${point.date}: ${point[metric]}`}
-          />
+            transition={{ delay: index * 0.1, duration: 0.5 }}
+            className="flex-1 relative group"
+          >
+            <div className={`absolute bottom-0 w-full rounded-t-lg transition-all duration-300 ${
+              isDarkMode ? 'bg-blue-500/80 group-hover:bg-blue-400' : 'bg-blue-500 group-hover:bg-blue-600'
+            }`} style={{ height: '100%' }}></div>
+            
+            {/* Tooltip */}
+            <div className="opacity-0 group-hover:opacity-100 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded pointer-events-none transition-opacity whitespace-nowrap z-10">
+              {point.date}: {typeof point[metric] === 'number' && point[metric] < 1 ? (point[metric]*100).toFixed(1) + '%' : point[metric]}
+            </div>
+          </motion.div>
         );
       })}
     </div>

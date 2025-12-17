@@ -78,7 +78,7 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         onClick={onClose}
       >
         <motion.div
@@ -86,25 +86,25 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 50 }}
           onClick={(e) => e.stopPropagation()}
-          className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl transition-colors duration-300 ${
+          className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl transition-all duration-300 ${
             isDarkMode 
-              ? 'bg-gray-900 border border-gray-700' 
-              : 'bg-white border border-gray-200'
+              ? 'bg-slate-900/90 border border-slate-700/50 backdrop-blur-xl' 
+              : 'bg-white/90 border border-white/50 backdrop-blur-xl'
           }`}
         >
           {/* Header */}
-          <div className={`p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className={`p-6 border-b ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200/50'}`}>
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-lg">📤</span>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg shadow-green-500/20 flex items-center justify-center">
+                  <span className="text-white text-xl">📤</span>
                 </div>
                 <div>
-                  <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                     Export Data
                   </h2>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Generate reports and export mining data
+                  <p className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Generate comprehensive reports and export mining data
                   </p>
                 </div>
               </div>
@@ -112,13 +112,13 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 rounded-xl transition-colors ${
                   isDarkMode 
-                    ? 'hover:bg-gray-700 text-gray-400' 
-                    : 'hover:bg-gray-100 text-gray-600'
+                    ? 'hover:bg-slate-800 text-slate-400' 
+                    : 'hover:bg-slate-100 text-slate-400'
                 }`}
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </motion.button>
@@ -126,41 +126,42 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
+          <div className="p-8 space-y-8">
             {/* Export Format Selection */}
             <div>
-              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Export Format
+              <h3 className={`text-lg font-bold mb-4 flex items-center space-x-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                <span>Export Format</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {exportFormats.map((format) => (
                   <motion.div
                     key={format.id}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setExportType(format.id)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`p-5 rounded-2xl border-2 cursor-pointer transition-all relative overflow-hidden group ${
                       exportType === format.id
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg shadow-blue-500/10'
                         : isDarkMode
-                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800'
-                        : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                        ? 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
+                        : 'border-slate-100 hover:border-slate-200 bg-white/50 hover:bg-white'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{format.icon}</span>
+                    <div className="flex items-start space-x-4 relative z-10">
+                      <span className="text-3xl p-2 bg-white/50 dark:bg-slate-700/50 rounded-xl backdrop-blur-sm">{format.icon}</span>
                       <div className="flex-1">
-                        <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <h4 className={`font-bold text-lg ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                           {format.name}
                         </h4>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`text-xs mt-1 leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                           {format.description}
                         </p>
                       </div>
                       {exportType === format.id && (
-                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <div className="absolute top-4 right-4 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-blue-500/30">
+                          <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                       )}
@@ -172,69 +173,77 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
 
             {/* Export Options */}
             <div>
-              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Export Options
+              <h3 className={`text-lg font-bold mb-4 flex items-center space-x-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                <span className="w-1.5 h-6 bg-purple-500 rounded-full"></span>
+                <span>Export Options</span>
               </h3>
               
               {/* Date Range */}
-              <div className="mb-4">
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              <div className="mb-6">
+                <label className={`block text-sm font-bold mb-2 uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Date Range
                 </label>
-                <select
-                  value={exportOptions.dateRange}
-                  onChange={(e) => handleOptionChange('dateRange', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    isDarkMode 
-                      ? 'bg-gray-800 border-gray-600 text-white' 
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
-                >
-                  <option value="last_7_days">Last 7 days</option>
-                  <option value="last_30_days">Last 30 days</option>
-                  <option value="last_90_days">Last 90 days</option>
-                  <option value="last_year">Last year</option>
-                  <option value="all_time">All time</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={exportOptions.dateRange}
+                    onChange={(e) => handleOptionChange('dateRange', e.target.value)}
+                    className={`w-full px-4 py-3 border rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                      isDarkMode 
+                        ? 'bg-slate-800 border-slate-600 text-white' 
+                        : 'bg-white border-slate-200 text-slate-800 shadow-sm'
+                    }`}
+                  >
+                    <option value="last_7_days">Last 7 days</option>
+                    <option value="last_30_days">Last 30 days</option>
+                    <option value="last_90_days">Last 90 days</option>
+                    <option value="last_year">Last year</option>
+                    <option value="all_time">All time</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg className={`w-5 h-5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Include Options */}
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
-                  { key: 'includeCharts', label: 'Include Charts & Visualizations', description: 'Risk charts, trend graphs, and visual analytics' },
-                  { key: 'includeMap', label: 'Include Map Data', description: 'Geographic coordinates and location information' },
-                  { key: 'includeAlerts', label: 'Include Alert History', description: 'Past alerts and warning notifications' },
-                  { key: 'includeAnalytics', label: 'Include Analytics Data', description: 'Statistical analysis and predictions' }
+                  { key: 'includeCharts', label: 'Charts & Visuals', description: 'Risk charts & trends' },
+                  { key: 'includeMap', label: 'Map Data', description: 'Geo-coordinates & locations' },
+                  { key: 'includeAlerts', label: 'Alert History', description: 'Past warnings & logs' },
+                  { key: 'includeAnalytics', label: 'Analytics Data', description: 'Stats & predictions' }
                 ].map((option) => (
                   <div
                     key={option.key}
-                    className={`flex items-start space-x-3 p-3 rounded-lg ${
-                      isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+                    onClick={() => handleOptionChange(option.key, !exportOptions[option.key])}
+                    className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                      exportOptions[option.key]
+                        ? isDarkMode ? 'bg-blue-900/20 border-blue-500/50' : 'bg-blue-50 border-blue-200'
+                        : isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-100 hover:bg-slate-50'
                     }`}
                   >
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleOptionChange(option.key, !exportOptions[option.key])}
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    <div
+                      className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
                         exportOptions[option.key]
                           ? 'bg-blue-500 border-blue-500'
                           : isDarkMode
-                          ? 'border-gray-600'
-                          : 'border-gray-300'
+                          ? 'border-slate-500'
+                          : 'border-slate-300'
                       }`}
                     >
                       {exportOptions[option.key] && (
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                    </motion.button>
-                    <div className="flex-1">
-                      <label className={`font-medium cursor-pointer ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    </div>
+                    <div>
+                      <label className={`font-bold text-sm cursor-pointer ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
                         {option.label}
                       </label>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                         {option.description}
                       </p>
                     </div>
@@ -244,49 +253,61 @@ const ExportModal = ({ isOpen, onClose, data, mineData, onExport }) => {
             </div>
 
             {/* Export Preview */}
-            <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-              <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Export Preview
+            <div className={`p-5 rounded-xl border border-dashed ${isDarkMode ? 'bg-slate-800/50 border-slate-600' : 'bg-slate-50 border-slate-300'}`}>
+              <h4 className={`font-bold text-sm uppercase tracking-wider mb-3 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                Export Summary
               </h4>
-              <div className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                <p>Format: {exportFormats.find(f => f.id === exportType)?.name}</p>
-                <p>Date Range: {exportOptions.dateRange.replace(/_/g, ' ')}</p>
-                <p>Estimated Size: ~{Math.floor(Math.random() * 5 + 1)}.{Math.floor(Math.random() * 9)}MB</p>
-                <p>Mine Locations: {mineData?.length || 127} sites</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Format</p>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{exportFormats.find(f => f.id === exportType)?.name}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Time Period</p>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{exportOptions.dateRange.replace(/_/g, ' ')}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Estimated Size</p>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>~{Math.floor(Math.random() * 5 + 1)}.{Math.floor(Math.random() * 9)}MB</p>
+                </div>
+                <div className="space-y-1">
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Data Points</p>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{mineData?.length || 127} sites</p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className={`p-6 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-            <div className="flex justify-end space-x-3">
+          <div className={`p-6 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200/50'} bg-slate-50/50 dark:bg-slate-800/50`}>
+            <div className="flex justify-end space-x-4">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={onClose}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                className={`px-6 py-3 text-sm font-bold rounded-xl transition-colors ${
                   isDarkMode 
-                    ? 'text-gray-400 hover:text-white' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                 }`}
               >
                 Cancel
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleExport}
                 disabled={isExporting}
-                className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                className={`px-8 py-3 text-sm font-bold text-white rounded-xl shadow-lg shadow-blue-500/30 transition-all ${
                   isExporting 
-                    ? 'bg-gray-500 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+                    ? 'bg-slate-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/50 hover:-translate-y-0.5'
                 }`}
               >
                 {isExporting ? (
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Exporting...</span>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Processing...</span>
                   </div>
                 ) : (
                   'Export Data'

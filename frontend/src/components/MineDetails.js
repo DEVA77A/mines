@@ -335,9 +335,13 @@ const MineDetails = () => {
                 <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   Location
                 </h3>
-                <div className={`h-64 rounded-lg flex items-center justify-center ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                }`}>
+                <div 
+                  className={`h-64 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
+                    isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${currentMine.latitude},${currentMine.longitude}`, '_blank')}
+                  title="Click to view on Google Maps"
+                >
                   <div className="text-center">
                     <MapPin className={`w-12 h-12 mx-auto mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -345,6 +349,9 @@ const MineDetails = () => {
                     </p>
                     <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
                       Lng: {currentMine.longitude.toFixed(6)}
+                    </p>
+                    <p className={`text-sm mt-2 font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                      View on Google Maps
                     </p>
                   </div>
                 </div>

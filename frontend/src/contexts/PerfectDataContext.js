@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import perfectApiService from '../services/perfectApiService';
 
 // Create the Perfect Data Context
@@ -26,6 +26,9 @@ export const PerfectDataProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  // Ref to track selected mine for interval (avoids re-creating interval on selection)
+  const selectedMineRef = useRef(null);
+  
   // Filter states
   const [filters, setFilters] = useState({
     district: '',
@@ -36,18 +39,24 @@ export const PerfectDataProvider = ({ children }) => {
   });
   
   // Fetch all mines
-  const fetchMines = useCallback(async (customFilters = null) => {
-    setLoading(true);
+  const fetchMines = useCallback(async (customFilters = null, isBackground = false) => {
+    if (!isBackground) {
+      setLoading(true);
+    }
     setError(null);
     
     try {
-      console.log('🔄 Fetching mines with filters:', customFilters || filters);
+      if (!isBackground) {
+        console.log('🔄 Fetching mines with filters:', customFilters || filters);
+      }
       const mineData = await perfectApiService.getMines(customFilters || filters);
       
       setMines(mineData);
       setFilteredMines(mineData);
       
-      console.log(`✅ Successfully loaded ${mineData.length} mines`);
+      if (!isBackground) {
+        console.log(`✅ Successfully loaded ${mineData.length} mines`);
+      }
       
       // Verify no mines are in the sea
       const landMines = mineData.filter(mine => 
@@ -57,15 +66,15 @@ export const PerfectDataProvider = ({ children }) => {
       
       if (landMines.length !== mineData.length) {
         console.warn(`⚠️ Warning: ${mineData.length - landMines.length} mines may be in invalid locations`);
-      } else {
-        console.log('🎯 All mines verified to be within Tamil Nadu land boundaries');
       }
       
     } catch (err) {
       console.error('❌ Error fetching mines:', err);
       setError(`Failed to fetch mines: ${err.message}`);
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
     }
   }, [filters]);
   
@@ -315,6 +324,11 @@ export const PerfectDataProvider = ({ children }) => {
     return colors[mineType]?.color || "#808080";
   }, [mineColors]);
   
+  // Keep ref in sync with selectedMine state
+  useEffect(() => {
+    selectedMineRef.current = selectedMine;
+  }, [selectedMine]);
+  
   // Initialize data on component mount
   useEffect(() => {
     const initializeData = async () => {
@@ -333,6 +347,19 @@ export const PerfectDataProvider = ({ children }) => {
     };
     
     initializeData();
+
+    // Auto-refresh data every 30 seconds to keep weather "live"
+    // Use ref to check selectedMine to avoid recreating interval on mine selection
+    const intervalId = setInterval(() => {
+      if (!selectedMineRef.current) {
+        console.log('🔄 Auto-refreshing mine data (Background)...');
+        fetchMines(null, true); // Pass true for isBackground
+      } else {
+        console.log('⏸️ Auto-refresh paused while viewing mine details');
+      }
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, [fetchMines, fetchDistricts, fetchAnalytics, fetchAlerts, fetchMineColors]);
   
   // Apply filters when filters change

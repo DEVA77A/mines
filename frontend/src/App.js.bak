@@ -1,0 +1,25 @@
+import React from 'react';
+import PerfectDashboard from './components/PerfectDashboard';
+import { PerfectDataProvider } from './contexts/PerfectDataContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import CustomCursor from './components/CustomCursor';
+import HeroParallax from './components/HeroParallax';
+import AnimatedNav from './components/AnimatedNav';
+
+function App() {
+  return (
+    <ThemeProvider>
+      <PerfectDataProvider>
+        <div className="app-with-custom-cursor">
+          <CustomCursor />
+          <AnimatedNav />
+          {/* Hero: lightweight animated/parallax hero (no WebGL) */}
+          <HeroParallax />
+          <PerfectDashboard />
+        </div>
+      </PerfectDataProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;

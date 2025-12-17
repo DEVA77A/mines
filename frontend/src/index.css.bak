@@ -5,31 +5,6 @@
 /* Custom Instagram-inspired styles */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Official / Clean theme variables */
-:root {
-  --bg: #f6f8fa;
-  --surface: #ffffff;
-  --muted: #6b7280;
-  --text: #0f172a;
-  --primary: #0f62fe;
-  --primary-600: #0353e9;
-  --accent: #0ea5a4;
-  --border: rgba(15,23,42,0.06);
-  --shadow: 0 8px 24px rgba(15,23,42,0.06);
-}
-
-/* Ensure page background and base text color reflect the theme immediately */
-html, body, #root {
-  height: 100%;
-}
-
-body {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -45,23 +20,11 @@ body {
 @layer components {
   /* Instagram-style buttons */
   .btn-primary {
-    background: var(--primary);
-    color: white;
-    font-weight: 600;
-    padding: 0.6rem 1.1rem;
-    border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(15,99,255,0.08);
-    transition: transform 160ms ease, box-shadow 160ms ease;
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium py-2 px-6 rounded-full hover:shadow-lg transition-all duration-200 transform hover:scale-105;
   }
-
-  .btn-primary:hover { transform: translateY(-2px); background: var(--primary-600); }
-
+  
   .btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 0.55rem 1rem;
-    border-radius: 8px;
+    @apply bg-white text-gray-700 border border-gray-300 font-medium py-2 px-6 rounded-full hover:bg-gray-50 transition-all duration-200;
   }
   
   .btn-danger {
@@ -70,14 +33,8 @@ body {
   
   /* Instagram-style cards */
   .card-instagram {
-    background: var(--surface);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    @apply bg-white rounded-instagram shadow-instagram border border-gray-100 overflow-hidden transition-all duration-200 hover:shadow-card-hover;
   }
-  .card-instagram:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(15,23,42,0.08); }
   
   .card-gradient {
     @apply bg-gradient-to-br from-white to-gray-50 rounded-instagram shadow-card border border-gray-100;
@@ -98,14 +55,8 @@ body {
   
   /* Input styles */
   .input-instagram {
-    width: 100%;
-    padding: 0.6rem 0.9rem;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #fff;
-    transition: box-shadow 160ms ease, border-color 160ms ease;
+    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200;
   }
-  .input-instagram:focus { box-shadow: 0 8px 24px rgba(15,99,255,0.06); border-color: var(--primary); outline: none; }
   
   /* Gradient text */
   .text-gradient {
@@ -119,9 +70,7 @@ body {
   
   /* Map styles */
   .leaflet-container {
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--border);
+    @apply rounded-instagram overflow-hidden;
   }
   
   /* Custom scrollbar */
@@ -136,7 +85,7 @@ body {
   
   /* Dashboard grid */
   .dashboard-grid {
-    display:grid; gap:1.25rem;
+    @apply grid gap-6;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
   

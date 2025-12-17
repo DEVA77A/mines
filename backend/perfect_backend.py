@@ -13,6 +13,7 @@ import json
 import logging
 import random
 import requests
+import os
 from datetime import datetime, timedelta
 from typing import List, Optional
 from contextlib import asynccontextmanager
@@ -23,12 +24,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime, Boolean, Text, func
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
+import pandas as pd
+import numpy as np
+import joblib
+from pathlib import Path
+from typing import Dict, Any
 
 # Database setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./perfect_rockfall_system.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# Global variables for ML models
+ml_models = {}
+scaler = None
+
+# Global settings (can be updated via API)
+app_settings = {
+    "weather_api_key": os.getenv("OPENWEATHER_API_KEY", ""),
+    "monitoring_interval_minutes": 60,
+    "auto_refresh_enabled": True,
+    "last_weather_update": None
+}
+feature_columns = []
 
 # Database Models
 class Mine(Base):
@@ -141,6 +160,22 @@ class AlertResponse(BaseModel):
     timestamp: str
     is_active: bool
 
+class MineFeatures(BaseModel):
+    latitude: float
+    longitude: float
+    elevation_m: float
+    slope_degrees: float
+    avg_rainfall_mm: float
+    avg_temp_c: float
+    mineral_type: str
+    lease_area_ha: float
+
+class RiskPredictionResponse(BaseModel):
+    risk_category: str
+    risk_probability: Dict[str, float]
+    risk_factors: Dict[str, Any]
+    confidence: float
+
 # PERFECT Tamil Nadu district coordinates - GUARANTEED LAND PLACEMENT ONLY
 TAMIL_NADU_DISTRICTS = {
     "Chennai": {
@@ -229,16 +264,16 @@ TAMIL_NADU_DISTRICTS = {
     }
 }
 
-# Mine types with characteristics
+# Mine types with characteristics - BALANCED risk factors for proper distribution
 MINE_TYPES = {
-    "Iron Ore": {"elevation_range": (200, 600), "risk_factor": 0.7, "color": "#8B4513"},
-    "Coal": {"elevation_range": (100, 400), "risk_factor": 0.6, "color": "#2F4F4F"},
-    "Limestone": {"elevation_range": (50, 300), "risk_factor": 0.5, "color": "#D3D3D3"},
-    "Granite": {"elevation_range": (300, 800), "risk_factor": 0.8, "color": "#FF69B4"},
-    "Bauxite": {"elevation_range": (150, 500), "risk_factor": 0.6, "color": "#CD853F"},
-    "Copper": {"elevation_range": (200, 700), "risk_factor": 0.9, "color": "#B87333"},
-    "Manganese": {"elevation_range": (100, 400), "risk_factor": 0.7, "color": "#4B0082"},
-    "Mica": {"elevation_range": (200, 600), "risk_factor": 0.5, "color": "#F0E68C"}
+    "Iron Ore": {"elevation_range": (200, 600), "risk_factor": 0.35, "color": "#8B4513"},
+    "Coal": {"elevation_range": (100, 400), "risk_factor": 0.30, "color": "#2F4F4F"},
+    "Limestone": {"elevation_range": (50, 300), "risk_factor": 0.20, "color": "#D3D3D3"},
+    "Granite": {"elevation_range": (300, 800), "risk_factor": 0.45, "color": "#FF69B4"},
+    "Bauxite": {"elevation_range": (150, 500), "risk_factor": 0.28, "color": "#CD853F"},
+    "Copper": {"elevation_range": (200, 700), "risk_factor": 0.50, "color": "#B87333"},
+    "Manganese": {"elevation_range": (100, 400), "risk_factor": 0.32, "color": "#4B0082"},
+    "Mica": {"elevation_range": (200, 600), "risk_factor": 0.22, "color": "#F0E68C"}
 }
 
 # Global variable for background task
@@ -248,6 +283,39 @@ daily_task = None
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting Perfect AI-Powered Rockfall Risk Prediction System v4.0...")
+    
+    # Load ML Models
+    global ml_models, scaler, feature_columns
+    try:
+        models_dir = Path(__file__).parent.parent / "models"
+        
+        # Load ML models
+        model_files = {
+            'rockfall_model': models_dir / "rockfall_model.pkl",
+            'random_forest': models_dir / "random_forest_multiclass.pkl",
+            'lightgbm': models_dir / "lightgbm_multiclass.pkl"
+        }
+        
+        for model_name, model_path in model_files.items():
+            if model_path.exists():
+                ml_models[model_name] = joblib.load(model_path)
+                print(f"✅ Loaded {model_name}")
+        
+        # Load preprocessing objects
+        scaler_path = models_dir / "scaler.pkl"
+        if scaler_path.exists():
+            scaler = joblib.load(scaler_path)
+            print("✅ Loaded scaler")
+            
+        features_path = models_dir / "feature_columns.json"
+        if features_path.exists():
+            with open(features_path, 'r') as f:
+                feature_columns = json.load(f)
+            print(f"✅ Loaded {len(feature_columns)} feature columns")
+            
+    except Exception as e:
+        print(f"⚠️ Error loading ML models: {e}")
+
     initialize_database()
     # Start background task
     global daily_task
@@ -341,11 +409,12 @@ def initialize_database():
                 mine_type = random.choice(list(MINE_TYPES.keys()))
                 type_info = MINE_TYPES[mine_type]
                 
-                # Generate realistic risk score
+                # Generate realistic risk score with BALANCED distribution
                 base_risk = type_info["risk_factor"]
-                environmental_risk = random.uniform(0.1, 0.3)
-                risk_score = min(0.95, base_risk + environmental_risk + random.uniform(-0.2, 0.2))
-                risk_level = "Low" if risk_score < 0.4 else "Medium" if risk_score < 0.7 else "High"
+                environmental_risk = random.uniform(-0.1, 0.25)  # Can be negative for reduction
+                risk_score = min(0.95, max(0.05, base_risk + environmental_risk + random.uniform(-0.15, 0.15)))
+                # Use same thresholds as update_risk_assessment
+                risk_level = "Low" if risk_score < 0.35 else "Medium" if risk_score < 0.65 else "High"
                 
                 # Generate elevation within type-specific range
                 elevation = random.uniform(*type_info["elevation_range"])
@@ -492,43 +561,52 @@ async def update_mine_weather(mine: Mine, db: Session):
     db.add(weather_history)
 
 def update_risk_assessment(mine: Mine):
-    """Update risk assessment based on current conditions"""
+    """Update risk assessment based on current conditions - BALANCED for proper distribution"""
     risk_factors = []
     
-    # Weather-based risk assessment
-    if mine.recent_rainfall > 120:
-        risk_factors.append(0.3)
-    elif mine.recent_rainfall > 60:
-        risk_factors.append(0.2)
-    elif mine.recent_rainfall > 30:
-        risk_factors.append(0.1)
-    
-    if mine.wind_speed > 30:
-        risk_factors.append(0.25)
-    elif mine.wind_speed > 20:
+    # Weather-based risk assessment (reduced impact)
+    if mine.recent_rainfall > 150:
         risk_factors.append(0.15)
-    
-    if mine.temperature > 38:
-        risk_factors.append(0.1)
-    elif mine.temperature < 22:
+    elif mine.recent_rainfall > 100:
+        risk_factors.append(0.10)
+    elif mine.recent_rainfall > 50:
         risk_factors.append(0.05)
     
-    # Geological risk factors
-    if mine.slope_angle > 40:
-        risk_factors.append(0.2)
-    elif mine.slope_angle > 30:
-        risk_factors.append(0.1)
+    if mine.wind_speed > 35:
+        risk_factors.append(0.12)
+    elif mine.wind_speed > 25:
+        risk_factors.append(0.08)
+    elif mine.wind_speed > 15:
+        risk_factors.append(0.03)
     
-    if mine.elevation > 600:
-        risk_factors.append(0.1)
+    if mine.temperature > 40:
+        risk_factors.append(0.08)
+    elif mine.temperature > 35:
+        risk_factors.append(0.04)
+    
+    # Geological risk factors (reduced impact)
+    if mine.slope_angle > 45:
+        risk_factors.append(0.12)
+    elif mine.slope_angle > 35:
+        risk_factors.append(0.06)
+    elif mine.slope_angle > 25:
+        risk_factors.append(0.02)
+    
+    if mine.elevation > 700:
+        risk_factors.append(0.08)
+    elif mine.elevation > 500:
+        risk_factors.append(0.04)
     
     # Base risk from mine type
-    base_risk = MINE_TYPES.get(mine.type, {"risk_factor": 0.5})["risk_factor"]
+    base_risk = MINE_TYPES.get(mine.type, {"risk_factor": 0.30})["risk_factor"]
     
-    # Calculate new risk score
+    # Calculate new risk score with random variation for natural distribution
     additional_risk = sum(risk_factors)
-    mine.risk_score = min(0.95, max(0.05, base_risk + additional_risk))
-    mine.risk_level = "Low" if mine.risk_score < 0.4 else "Medium" if mine.risk_score < 0.7 else "High"
+    random_variation = random.uniform(-0.15, 0.15)  # Add some randomness
+    mine.risk_score = min(0.95, max(0.05, base_risk + additional_risk + random_variation))
+    
+    # Determine risk level with proper thresholds
+    mine.risk_level = "Low" if mine.risk_score < 0.35 else "Medium" if mine.risk_score < 0.65 else "High"
 
 def check_and_create_alerts(mine: Mine, db: Session):
     """Check conditions and create alerts if necessary"""
@@ -578,6 +656,79 @@ def check_and_create_alerts(mine: Mine, db: Session):
         db.add(alert)
 
 # API Routes
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    global ml_models
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "models_loaded": len(ml_models),
+        "database": "connected"
+    }
+
+@app.post("/predict", response_model=RiskPredictionResponse)
+async def predict_risk(features: MineFeatures):
+    """Predict rockfall risk for given mine features"""
+    global ml_models, scaler, feature_columns
+    
+    if not ml_models or 'rockfall_model' not in ml_models:
+        raise HTTPException(status_code=503, detail="ML model not available")
+    
+    try:
+        # Prepare feature vector
+        feature_dict = features.dict()
+        
+        # Create DataFrame with all required features
+        input_df = pd.DataFrame([feature_dict])
+        
+        # Add missing features with default values
+        for col in feature_columns:
+            if col not in input_df.columns:
+                if 'encoded' in col:
+                    input_df[col] = 0  # Default encoded value
+                else:
+                    input_df[col] = 0.0  # Default numerical value
+        
+        # Select and order features
+        X = input_df[feature_columns].fillna(0)
+        
+        # Scale if scaler is available
+        if scaler is not None:
+            X_scaled = scaler.transform(X)
+            X = pd.DataFrame(X_scaled, columns=feature_columns)
+        
+        # Make prediction
+        model = ml_models['rockfall_model']
+        risk_class = model.predict(X)[0]
+        risk_probabilities = model.predict_proba(X)[0]
+        
+        # Get class labels
+        class_labels = model.classes_
+        risk_prob_dict = {label: float(prob) for label, prob in zip(class_labels, risk_probabilities)}
+        
+        # Calculate confidence (max probability)
+        confidence = float(max(risk_probabilities))
+        
+        # Identify key risk factors
+        risk_factors = {
+            'slope_risk': features.slope_degrees / 45.0,  # Normalized slope risk
+            'elevation_factor': min(features.elevation_m / 2000.0, 1.0),  # Normalized elevation
+            'weather_stress': (features.avg_rainfall_mm - 100) / 1000.0,  # Weather impact
+            'mineral_risk': 0.7 if features.mineral_type in ['Granite', 'Iron Ore'] else 0.4
+        }
+        
+        return RiskPredictionResponse(
+            risk_category=risk_class,
+            risk_probability=risk_prob_dict,
+            risk_factors=risk_factors,
+            confidence=confidence
+        )
+        
+    except Exception as e:
+        print(f"Error in prediction: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
 @app.get("/")
 async def root():
     return {
@@ -753,6 +904,44 @@ async def get_districts():
             })
         
         return sorted(districts, key=lambda x: x["mine_count"], reverse=True)
+    finally:
+        db.close()
+
+@app.get("/api/stats")
+async def get_stats():
+    """Get basic statistics for the dashboard"""
+    db = SessionLocal()
+    try:
+        total_mines = db.query(Mine).count()
+        
+        # Risk distribution
+        high_risk = db.query(Mine).filter(Mine.risk_level == "High").count()
+        medium_risk = db.query(Mine).filter(Mine.risk_level == "Medium").count()
+        low_risk = db.query(Mine).filter(Mine.risk_level == "Low").count()
+        
+        # Status distribution
+        active_mines = db.query(Mine).filter(Mine.status.in_(["Active", "Operational"])).count()
+        
+        # Average risk score
+        avg_risk = db.query(func.avg(Mine.risk_score)).scalar() or 0
+        
+        # Recent critical alerts
+        critical_alerts = db.query(Alert).filter(
+            Alert.timestamp >= datetime.now() - timedelta(days=7),
+            Alert.is_active == True,
+            Alert.severity == "Critical"
+        ).count()
+        
+        return {
+            "total_mines": total_mines,
+            "active_mines": active_mines,
+            "high_risk_mines": high_risk,
+            "medium_risk_mines": medium_risk,
+            "low_risk_mines": low_risk,
+            "critical_alerts": critical_alerts,
+            "avg_risk_score": round(avg_risk, 3),
+            "last_updated": datetime.now().isoformat()
+        }
     finally:
         db.close()
 
@@ -987,6 +1176,67 @@ async def get_mine_colors():
             "Maintenance": "#FF6600"
         }
     }
+
+# Settings models
+class SettingsUpdate(BaseModel):
+    weather_api_key: Optional[str] = None
+    monitoring_interval_minutes: Optional[int] = None
+    auto_refresh_enabled: Optional[bool] = None
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current application settings"""
+    return {
+        "weather_api_key": app_settings["weather_api_key"][:8] + "****" if app_settings["weather_api_key"] else "",
+        "weather_api_key_set": bool(app_settings["weather_api_key"]),
+        "monitoring_interval_minutes": app_settings["monitoring_interval_minutes"],
+        "auto_refresh_enabled": app_settings["auto_refresh_enabled"],
+        "last_weather_update": app_settings["last_weather_update"]
+    }
+
+@app.put("/api/settings")
+async def update_settings(settings: SettingsUpdate):
+    """Update application settings"""
+    updated = []
+    
+    if settings.weather_api_key is not None:
+        app_settings["weather_api_key"] = settings.weather_api_key
+        updated.append("weather_api_key")
+    
+    if settings.monitoring_interval_minutes is not None:
+        if settings.monitoring_interval_minutes < 5:
+            raise HTTPException(status_code=400, detail="Monitoring interval must be at least 5 minutes")
+        app_settings["monitoring_interval_minutes"] = settings.monitoring_interval_minutes
+        updated.append("monitoring_interval_minutes")
+    
+    if settings.auto_refresh_enabled is not None:
+        app_settings["auto_refresh_enabled"] = settings.auto_refresh_enabled
+        updated.append("auto_refresh_enabled")
+    
+    return {
+        "status": "success",
+        "message": f"Settings updated: {', '.join(updated)}",
+        "settings": await get_settings()
+    }
+
+@app.post("/api/reinitialize-db")
+async def reinitialize_database_endpoint():
+    """Reinitialize the database with fresh data and balanced risk distribution"""
+    try:
+        # Drop all tables and recreate
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        
+        # Re-initialize with fresh data
+        initialize_database()
+        
+        return {
+            "status": "success",
+            "message": "Database reinitialized with balanced risk distribution",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database reinitialization failed: {str(e)}")
 
 if __name__ == "__main__":
     print("🚀 Starting Perfect AI-Powered Rockfall Risk Prediction System v4.0...")
