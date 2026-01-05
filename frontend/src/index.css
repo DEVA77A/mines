@@ -54,6 +54,11 @@ body {
     transition: transform 160ms ease, box-shadow 160ms ease;
   }
 
+  .btn-primary:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
   .btn-primary:hover { transform: translateY(-2px); background: var(--primary-600); }
 
   .btn-secondary {
@@ -62,6 +67,15 @@ body {
     border: 1px solid var(--border);
     padding: 0.55rem 1rem;
     border-radius: 8px;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(15, 23, 42, 0.03);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: 2px solid rgba(15, 98, 254, 0.35);
+    outline-offset: 2px;
   }
   
   .btn-danger {

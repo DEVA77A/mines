@@ -151,7 +151,7 @@ const PerfectDashboard = () => {
   }, [error]);
   
   return (
-    <div className="space-y-8 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 -m-6">
+    <div className="space-y-8 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 rounded-3xl border border-white/40 shadow-sm">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
         <div>
@@ -163,7 +163,7 @@ const PerfectDashboard = () => {
           </p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Manual Monitoring Button */}
           <button
             onClick={handleManualMonitoring}
