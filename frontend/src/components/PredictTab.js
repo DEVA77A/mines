@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { API_BASE_URL } from '../services/apiBaseUrl';
+
 export default function PredictTab() {
   const [form, setForm] = useState({
     latitude: '',
@@ -37,7 +39,7 @@ export default function PredictTab() {
         lease_area_ha: parseFloat(form.lease_area_ha) || 0
       };
 
-      const res = await fetch('http://localhost:8000/predict', {
+      const res = await fetch(`${API_BASE_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

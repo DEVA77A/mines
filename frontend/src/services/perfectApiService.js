@@ -1,13 +1,11 @@
 // Enhanced API Service with perfect backend integration
 import axios from 'axios';
 
-// Configure axios for consistent API calls
-// Use environment variable for production, fallback to localhost for development
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+import { API_BASE_URL } from './apiBaseUrl';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: process.env.NODE_ENV === 'production' ? 30000 : 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,7 +14,9 @@ const apiClient = axios.create({
 // Request interceptor for logging
 apiClient.interceptors.request.use(
   (config) => {
-    console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    const base = config.baseURL || '';
+    const url = config.url || '';
+    console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${base}${url}`);
     return config;
   },
   (error) => {
@@ -32,7 +32,10 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('❌ API Response Error:', error.response?.status, error.message);
+    const status = error.response?.status;
+    const method = error.config?.method?.toUpperCase();
+    const url = error.config?.baseURL ? `${error.config.baseURL}${error.config.url || ''}` : error.config?.url;
+    console.error('❌ API Response Error:', { status, code: error.code, method, url, message: error.message });
     return Promise.reject(error);
   }
 );
