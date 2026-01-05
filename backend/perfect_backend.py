@@ -29,6 +29,7 @@ import numpy as np
 import joblib
 from pathlib import Path
 from typing import Dict, Any
+import importlib.util
 
 # Database setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./perfect_rockfall_system.db"
@@ -279,6 +280,10 @@ MINE_TYPES = {
 # Global variable for background task
 daily_task = None
 
+
+def _is_module_available(module_name: str) -> bool:
+    return importlib.util.find_spec(module_name) is not None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -297,9 +302,16 @@ async def lifespan(app: FastAPI):
         }
         
         for model_name, model_path in model_files.items():
+            if model_name == "lightgbm" and not _is_module_available("lightgbm"):
+                print("ℹ️ lightgbm not installed; skipping LightGBM model load")
+                continue
             if model_path.exists():
-                ml_models[model_name] = joblib.load(model_path)
-                print(f"✅ Loaded {model_name}")
+                try:
+                    ml_models[model_name] = joblib.load(model_path)
+                    print(f"✅ Loaded {model_name}")
+                except ModuleNotFoundError as e:
+                    # Common on minimal deployments: unpickling may require optional ML libs.
+                    print(f"⚠️ Skipping {model_name} model (missing dependency): {e}")
         
         # Load preprocessing objects
         scaler_path = models_dir / "scaler.pkl"
@@ -729,7 +741,7 @@ async def predict_risk(features: MineFeatures):
         print(f"Error in prediction: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {
         "message": "Perfect AI-Powered Rockfall Risk Prediction System v4.0",
