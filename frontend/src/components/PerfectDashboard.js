@@ -18,6 +18,8 @@ import ExportModal from './ExportModal';
 import { usePerfectData } from '../contexts/PerfectDataContext';
 import toast from 'react-hot-toast';
 import { ViewModeContext } from '../contexts/ViewModeContext';
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 
 const PerfectDashboard = () => {
   const { 
@@ -25,6 +27,7 @@ const PerfectDashboard = () => {
     filteredMines, 
     selectedMine, 
     analytics, 
+    alerts,
     loading, 
     error, 
     filters,
@@ -63,8 +66,122 @@ const PerfectDashboard = () => {
   const handleExport = async (format, exportFilters) => {
     setShowExport(false);
     try {
-      await exportMineData(format, exportFilters);
-      toast.success(`${format.toUpperCase()} export completed!`);
+      const normalizedFormat = String(format || 'json').toLowerCase();
+      const today = new Date().toISOString().split('T')[0];
+
+      // For CSV/JSON, export exactly what the user sees.
+      if (normalizedFormat === 'csv' || normalizedFormat === 'json') {
+        await exportMineData(normalizedFormat, filters);
+        toast.success(`${normalizedFormat.toUpperCase()} export completed!`);
+        return;
+      }
+
+      // For PDF/XLSX, generate client-side exports.
+      const exportList = Array.isArray(filteredMines) && filteredMines.length ? filteredMines : (Array.isArray(mines) ? mines : []);
+
+      if (normalizedFormat === 'excel') {
+        const includeMap = exportFilters?.includeMap !== false;
+        const mineRows = exportList.map((m) => ({
+          id: m.id,
+          name: m.name,
+          district: m.district,
+          type: m.type,
+          status: m.status,
+          risk_level: m.risk_level,
+          risk_score: m.risk_score,
+          ...(includeMap ? { latitude: m.latitude, longitude: m.longitude } : {}),
+          elevation: m.elevation,
+          temperature: m.temperature,
+          humidity: m.humidity,
+          wind_speed: m.wind_speed,
+          recent_rainfall: m.recent_rainfall,
+          weather_description: m.weather_description,
+          last_updated: m.last_updated
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const minesSheet = XLSX.utils.json_to_sheet(mineRows);
+        XLSX.utils.book_append_sheet(wb, minesSheet, 'Mines');
+
+        if (exportFilters?.includeAnalytics !== false && analytics) {
+          const analyticsSheet = XLSX.utils.json_to_sheet([analytics]);
+          XLSX.utils.book_append_sheet(wb, analyticsSheet, 'Analytics');
+        }
+
+        if (exportFilters?.includeAlerts !== false && Array.isArray(alerts) && alerts.length) {
+          const alertsSheet = XLSX.utils.json_to_sheet(alerts);
+          XLSX.utils.book_append_sheet(wb, alertsSheet, 'Alerts');
+        }
+
+        XLSX.writeFile(wb, `tamil_nadu_mines_${today}.xlsx`);
+        toast.success('Excel export completed!');
+        return;
+      }
+
+      if (normalizedFormat === 'pdf') {
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        const left = 40;
+        let y = 48;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Tamil Nadu Mine Monitoring - Export', left, y);
+        y += 18;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, left, y);
+        y += 14;
+        doc.text(`Mines exported: ${exportList.length}`, left, y);
+        y += 18;
+
+        // Simple table header
+        doc.setFont('helvetica', 'bold');
+        doc.text('Name', left, y);
+        doc.text('District', left + 240, y);
+        doc.text('Risk', left + 360, y);
+        doc.text('Score', left + 430, y);
+        y += 10;
+        doc.setDrawColor(200);
+        doc.line(left, y, 555, y);
+        y += 14;
+
+        doc.setFont('helvetica', 'normal');
+        const maxRows = 200; // keep PDF reasonably sized
+        const rows = exportList.slice(0, maxRows);
+        for (const m of rows) {
+          if (y > 780) {
+            doc.addPage();
+            y = 48;
+          }
+
+          const name = String(m.name || '').slice(0, 38);
+          const district = String(m.district || '').slice(0, 18);
+          const risk = String(m.risk_level || '').slice(0, 10);
+          const score = (typeof m.risk_score === 'number') ? `${Math.round(m.risk_score * 100)}%` : '';
+
+          doc.text(name, left, y);
+          doc.text(district, left + 240, y);
+          doc.text(risk, left + 360, y);
+          doc.text(score, left + 430, y);
+          y += 14;
+        }
+
+        if (exportList.length > maxRows) {
+          if (y > 780) {
+            doc.addPage();
+            y = 48;
+          }
+          doc.setFont('helvetica', 'italic');
+          doc.text(`Showing first ${maxRows} mines (of ${exportList.length}).`, left, y);
+        }
+
+        doc.save(`tamil_nadu_mines_${today}.pdf`);
+        toast.success('PDF export completed!');
+        return;
+      }
+
+      throw new Error(`Unsupported export format: ${format}`);
     } catch (error) {
       toast.error('Export failed');
     }

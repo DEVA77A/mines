@@ -171,36 +171,134 @@ export const PerfectDataProvider = ({ children }) => {
   // Export mine data
   const exportMineData = useCallback(async (format = 'json', exportFilters = {}) => {
     try {
-      console.log(`📤 Exporting mine data in ${format} format`);
-      const exportData = await perfectApiService.exportMineData(format, exportFilters);
-      
-      // Create download link
-      const dataStr = format === 'csv' 
-        ? exportData.data.map(row => row.join(',')).join('\n')
-        : JSON.stringify(exportData.data, null, 2);
-      
-      const dataBlob = new Blob([dataStr], { 
-        type: format === 'csv' ? 'text/csv' : 'application/json' 
-      });
+      const normalizedFormat = String(format || 'json').toLowerCase();
+      if (normalizedFormat !== 'csv' && normalizedFormat !== 'json') {
+        throw new Error(`Unsupported export format: ${format}`);
+      }
+
+      // Export should match what the user sees. Prefer filteredMines when available.
+      const shouldApplyExplicitFilters = exportFilters && Object.values(exportFilters).some((v) => v !== '' && v != null);
+      const baseList = Array.isArray(mines) ? mines : [];
+
+      const applyLocalFilters = (list) => {
+        const f = exportFilters || {};
+        let out = [...list];
+
+        if (f.district) {
+          out = out.filter((m) => (m.district || '').toLowerCase().includes(String(f.district).toLowerCase()));
+        }
+        if (f.risk_level) {
+          out = out.filter((m) => String(m.risk_level || '').toLowerCase() === String(f.risk_level).toLowerCase());
+        }
+        if (f.mine_type) {
+          out = out.filter((m) => (m.type || '').toLowerCase().includes(String(f.mine_type).toLowerCase()));
+        }
+        if (f.status) {
+          out = out.filter((m) => (m.status || '').toLowerCase().includes(String(f.status).toLowerCase()));
+        }
+        if (f.search) {
+          const q = String(f.search).toLowerCase();
+          out = out.filter((m) => {
+            const name = String(m.name || '').toLowerCase();
+            const district = String(m.district || '').toLowerCase();
+            const type = String(m.type || '').toLowerCase();
+            const desc = String(m.description || '').toLowerCase();
+            return name.includes(q) || district.includes(q) || type.includes(q) || desc.includes(q);
+          });
+        }
+
+        return out;
+      };
+
+      const exportList = shouldApplyExplicitFilters
+        ? applyLocalFilters(baseList)
+        : (Array.isArray(filteredMines) && filteredMines.length ? filteredMines : baseList);
+
+      const filenameBase = `tamil_nadu_mines_${new Date().toISOString().split('T')[0]}`;
+
+      const escapeCsv = (value) => {
+        if (value === null || value === undefined) return '';
+        const s = String(value);
+        if (/[\r\n",]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+
+      let dataStr;
+      let mime;
+      if (normalizedFormat === 'csv') {
+        const headers = [
+          'id',
+          'name',
+          'district',
+          'type',
+          'status',
+          'risk_level',
+          'risk_score',
+          'latitude',
+          'longitude',
+          'elevation',
+          'temperature',
+          'humidity',
+          'wind_speed',
+          'recent_rainfall',
+          'weather_description',
+          'last_updated'
+        ];
+
+        const lines = [headers.join(',')];
+        for (const m of exportList) {
+          const row = [
+            m.id,
+            m.name,
+            m.district,
+            m.type,
+            m.status,
+            m.risk_level,
+            m.risk_score,
+            m.latitude,
+            m.longitude,
+            m.elevation,
+            m.temperature,
+            m.humidity,
+            m.wind_speed,
+            m.recent_rainfall,
+            m.weather_description,
+            m.last_updated
+          ].map(escapeCsv);
+          lines.push(row.join(','));
+        }
+
+        // UTF-8 BOM helps Excel open CSV correctly
+        dataStr = `\uFEFF${lines.join('\n')}`;
+        mime = 'text/csv;charset=utf-8';
+      } else {
+        dataStr = JSON.stringify(exportList, null, 2);
+        mime = 'application/json';
+      }
+
+      console.log(`📤 Exporting ${exportList.length} mines as ${normalizedFormat.toUpperCase()}`);
+      const dataBlob = new Blob([dataStr], { type: mime });
       
       const url = window.URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `tamil_nadu_mines_${new Date().toISOString().split('T')[0]}.${format}`;
+      link.download = `${filenameBase}.${normalizedFormat}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      console.log(`✅ Export completed: ${exportData.count} mines`);
-      return exportData;
+
+      const result = { format: normalizedFormat, count: exportList.length };
+      console.log(`✅ Export completed: ${result.count} mines`);
+      return result;
       
     } catch (err) {
       console.error('❌ Error exporting data:', err);
       setError(`Export failed: ${err.message}`);
       throw err;
     }
-  }, []);
+  }, [filteredMines, mines]);
+
   
   // Trigger manual monitoring
   const triggerManualMonitoring = useCallback(async () => {
